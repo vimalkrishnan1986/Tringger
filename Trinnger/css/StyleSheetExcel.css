@@ -1,0 +1,501 @@
+﻿.calenderimg
+{
+    width:16;
+    height:16; 
+    
+}
+.label
+{
+    color:#000000;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:13px;  
+}
+
+.allfont
+{
+    color:black;
+    font-family:Calibri;
+    font-size:12px; 
+    
+}
+
+.controlborder
+{
+    border:1px solid #9ACD32;
+}
+
+
+.gridviewlink
+{
+    
+}
+.menu
+{
+    background-color:#07A1C0;
+    color:White; 
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px; 
+    cursor:pointer;
+    width:150px;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#000000;', endColorstr='#07F9FD'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#000000), to(#07F9FD)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #000000,  #07F9FD); /* for firefox 3.6+ */ 
+    /*background-Image:Url("../Images/blackh1.png");
+    background-repeat:repeat-x;*/}
+}
+.menuselected
+{
+    color:#9ACD32;
+    background-color:#FFFF00; 
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px;
+    cursor:pointer;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFF00;', endColorstr='#FF0000'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#FFFF00), to(#FF0000)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #FFFF00,  #FF0000); /* for firefox 3.6+ */ 
+}
+.submenu
+{
+     background-color:#07F9FD;
+     color:White;
+     font-family:Calibri;
+     font-weight:bolder; 
+     font-size:12px;
+     cursor:pointer;
+     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#07F9FD;', endColorstr='#000000'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#07F9FD), to(#000000)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #07F9FD,  #000000); /* for firefox 3.6+ */ 
+}
+
+.submenuselect
+{
+     background-color:#07F9FD;
+    color:#FFFF00;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:12px;
+    cursor:pointer; 
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#3D3DB5;', endColorstr='#07F9FD'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#3D3DB5), to(#07F9FD)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #3D3DB5,  #07F9FD); /* for firefox 3.6+ */ 
+}
+.submenuborder 
+{
+    border:0px ridge lightgray;
+    border-top:0;
+    z-index:10000; 
+}
+ 
+.formlayout
+{
+    background-color:#928F8F;
+    /*background-image:url("../Images/bgstyle.png");
+    background-repeat:repeat;*/
+    border:2.5px ridge #928F8F; 
+   width:80%;
+}
+
+.featuresmenu
+{
+     background-color:#00c5e5;
+     border:1px ridge gray;
+     font-weight:bolder;
+     color:Yellow !important;
+}
+
+.featuremenuselected
+{
+    background-color:#928F8F;
+    color:Yellow;
+}
+
+.logimgchange
+{    
+    background-color:#928F8F;
+    background-image:url("../Images/gnome_session_logout1.png");
+    background-repeat:no-repeat;
+    border:0px;
+    margin:0px;
+    width:32px;
+    height:32px;
+}  
+
+.logimgchange:hover
+{    
+    background-color:#928F8F;
+    background-image:url("../Images/gnome_session_logout.png");
+    background-repeat:no-repeat;
+    border:0px;
+    margin:0px;
+    width:32px;
+    height:32px;
+   
+}
+.signin
+{
+    color:#05FD58;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px; 
+    background-color:#928F8F;
+    border:2px;
+    border-color:#000000;
+    margin:0px;
+    
+}
+
+.signin:hover
+{
+    color:DarkOliveGreen;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px; 
+    
+}
+.menuborder
+{
+    border-bottom:0px ridge Black;
+    font-family:Calibri;
+}
+.gridcaption
+{
+    border:3px ridge #7179C3;
+    padding:5px;
+    background-color:#00c5e5;
+    font-family:calibri !important;
+    text-decoration:none;
+    color:black;
+    font-size:14px;
+
+              
+}
+
+a
+{
+    padding:4px;
+    color:#050505;
+    font-family:Calibri;
+    font-size:12px;
+    text-align:left;
+    
+}
+
+caption
+{
+    padding:4px;
+    color:#9ACD32;
+    font-family:Calibri;
+    font-size:16px;
+    text-align:left;
+    font-weight:bolder;
+}
+.gridvalue
+{
+    padding:4px;
+    color:#000000;
+    border:1px solid #000000;
+    font-family:Calibri;
+    font-size:12px;
+    text-align:left;
+    vertical-align:middle;
+              
+}
+.panelheading
+{
+   
+    color:#9ACD32;
+    font-family:Calibri;
+    height:108px;
+    width:100%;
+    font-weight:bolder; 
+    font-style:italic;
+    font-size:38px;
+   
+              
+}
+
+.bgpanelline
+{
+    background-Image:Url("../Images/bgline.png");
+    background-repeat:repeat-x;
+    color:#FFFFFF;
+    font-family:Calibri;
+    height:108px;
+    width:100%;
+    font-weight:bolder; 
+   
+              
+}
+
+.loginbgstyle
+{
+    background-image: Url("../Images/login5.png");
+    background-repeat: no-repeat;
+    height: 280px;
+    width: 450px;
+}
+
+.goldhbar
+{
+
+    background-color:#FFA500;
+    
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#3213f1', endColorstr='#ffffff'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#3213f1), to(#fff)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #3213f1,  #fff); /* for firefox 3.6+ */ 
+    /*background-Image:Url("../Images/blackh1.png");
+    background-repeat:repeat-x;*/}
+
+.brownhbar
+{
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#008000', endColorstr='#ffffff'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#008000), to(#fff)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #008000,  #fff); /* for firefox 3.6+ */ 
+    /*background-Image:Url("../Images/brownh1.png");
+    background-repeat:repeat-x;*/
+    background-color:#008000;
+}
+
+.blackhbar 
+{
+    background-color:#9ACD32;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#800080', endColorstr='#ffffff'); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#800080), to(#fff)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #800080,  #fff); /* for firefox 3.6+ */ 
+    /*background-Image:Url("../Images/blackh1.png");
+    background-repeat:repeat-x;*/
+}
+
+.BlueBar
+{
+    background-Image:Url("../Images/blue.png");
+    background-repeat:no-repeat;
+}
+.heading
+{
+    color:#ffffff;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:18px; 
+              
+}
+
+.pageheading          
+{
+    color:#000000;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:18px; 
+    
+}
+.gridtd
+{
+    background-color:#9ACD32;
+    border:1px solid gray;
+}
+.msgstyle
+{
+    color:Gray;
+    font-family:Calibri;
+    font-size:12px;
+    font-weight:bolder; 
+                
+}
+                        
+.warningstyle
+{
+    color:DarkOliveGreen;
+    font-family:Calibri;
+    font-size:12px; 
+     font-weight:bolder;             
+}
+            
+.bgstyle
+{
+    background-color:#ffffff;
+}
+            
+.divformlayout
+{
+    background-color:#ffffff;        
+    width:100%;
+    height:100%;
+ }
+       
+.leftside
+{
+    background-color:Black;
+}        
+
+
+#rightside
+{
+    background-color:Black;
+}
+
+.navigation
+{
+    color:#4B0082;
+    background-Image:Url("../Images/ButtonFace1.png");
+    background-repeat:no-repeat;
+    height:35px;
+    width:80px;
+    cursor:pointer;
+    border:1px;
+    background-color:#9ACD32;
+    font-family:Calibri;
+    font-size:15px;
+    font-weight:bolder; 
+    
+}
+
+.menubutton
+{
+    color:#FFFF00;
+    background-Image:Url("../Images/ButtonFace1.png");
+    background-repeat:no-repeat;
+    height:35px;
+    width:80px;
+    cursor:pointer;
+    border:1px;
+    background-color:#ffffff;
+    font-family:Calibri;
+    font-size:15px;
+    font-weight:bolder; 
+}
+
+.searchbutton
+{
+    color:#9ACD32;
+    background-Image:Url("../Images/ButtonFace1.png");
+    background-repeat:no-repeat;
+    height:35px;
+    width:80px;
+    cursor:pointer;
+    border:1px;
+    background-color:#9ACD32;
+    font-family:Calibri;
+    font-size:15px;
+    font-weight:bolder; 
+}
+
+.loginbutton
+{
+    color: #FFFF00;
+    background-image: Url("../Images/ButtonFace1.png");
+    background-repeat: no-repeat;
+    height: 35px;
+    width: 80px;
+    font-family:Calibri;
+    font-size:19px;
+    font-weight:bolder; 
+    cursor: pointer;
+    border: 1px;
+    background-color:#25adc2;
+    
+}
+.navigationtext
+{
+    color:#ffffff;
+    text-align:center;
+    background-color:#9ACD32;
+    border:0px;
+}
+
+.smallbutton
+{
+    color:#FFFF00;
+    background-Image:Url("../Images/Blue.png");
+    background-repeat:no-repeat;
+    height:45px;
+    width:45px;
+    cursor:pointer;
+    border:0px;
+    background-color:#928F8F;
+    font-family:Calibri;
+    font-size:16px;
+    font-weight:bolder; 
+    cursor: pointer;
+    border: 1px;
+    text-align:center;
+}
+
+	.completed
+			{
+				
+				background-image: url('../Images/preview-status-icons.png');
+				background-repeat: no-repeat;
+				background-position-x: -40px;
+				background-position-y: -170px;
+				width: 25px;
+				height: 25px;
+				border:0px;
+				background-color:inherit; 
+				
+			}
+			.warning
+			{
+			    
+			    background-image: url('../Images/WarningAn.gif');
+				background-repeat: no-repeat;
+				width: 48px;
+				height: 43px;
+				border:0px;
+				background-color:inherit; 
+				
+			}
+		            .planned{
+				background-image: url('../Images/Planned.png');
+				background-repeat: no-repeat;
+				width: 25px;
+				height: 25px;
+				border:0px;
+				background-color:inherit; 				
+			}
+			 .completedwarning{
+				background-image: url('../Images/completedwarning.png');
+				background-repeat: no-repeat;
+				width: 25px;
+				height: 25px;
+				border:0px;
+				background-color:inherit; 				
+			}
+				.inprogress
+				{
+				    background-image: url('../Images/preview-status-icons.png');
+				    background-repeat: no-repeat;
+				    background-position-x: -161px;
+				    background-position-y: -170px;
+				    width: 25px;
+				    height: 25px;
+				    border:0px;
+				   
+				}
+				
+				.cancelled{
+					background-image: url('../Images/preview-status-icons.png');
+				    background-repeat: no-repeat;
+				    background-position-x: -360px;
+				    background-position-y: -170px;
+				    width: 25px;
+				    height: 25px;
+				   
+				   }
+     /*.VerticalTextBox
+            {	
+            width: 15px;
+            border: 0px;
+            background-color: inherit;
+            line-height: 0.9;
+            font-size: 16px;
+            overflow:visible;
+            height: 300px;
+            float: left;
+            padding: 2px;
+            font-weight: bolder;
+ direction: rtl; 
+            
+            }*/

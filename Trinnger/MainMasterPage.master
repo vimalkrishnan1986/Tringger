@@ -1,0 +1,452 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MainMasterPage.master.cs" Inherits="MainMasterPage" %>
+<%@ Register Src="~/LoginInfo.ascx" TagName="Log" TagPrefix="gsp"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+    <head id="Head1" runat="server">
+        <title></title>
+        <link rel="Stylesheet" href="css/calendar.css" type="text/css" />
+        <link rel="Stylesheet" href="css/StyleSheet.css" type="text/css" />
+        <script language = "javascript" type="text/javascript" src="..\Script\FormResize.js"></script>
+        <script language = "javascript" type="text/javascript" src="..\Script\Calender.js"></script>
+         <script language = "javascript" type="text/javascript" src="..\Script\jquery-2.1.4.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+         <link href="css/bootstrap_Flatly.css" rel="stylesheet" />
+        <script language ="javascript" type="text/javascript">
+         var objFeatureMenu;
+            function FnShowFeatures(objDiv, strId) 
+            {
+              
+                if (objFeatureMenu) {
+                    objFeatureMenu.style.display = "none";
+                }
+
+                objFeatureMenu = document.getElementById((strId == undefined) ? "featuresmenu" : strId);
+                var objPosition = getOffset(objFeatureMenu)
+                if (window.event) {
+                    intTop = window.event.clientY;
+                    intRight = (window.event.clientX);
+                }
+                else {
+                    intTop = (event.pageY);
+                    intRight = (event.pageX);
+                }
+             
+             //var intTop = objPosition.top-130;
+             //  var intRight = objPosition.left+90;
+                with (objFeatureMenu.style) 
+                {
+                    display = "";
+                    width ="150px";
+                    position = "absolute";
+                    zIndex = 100000;
+                    top = intTop + "px";
+                    left = intRight + "px";
+
+
+                }
+            }
+            function FnHideFeatures(objThis,strId) {
+                document.getElementById((strId==undefined)?"featuresmenu":strId).style.display = "none"
+            }
+            function getOffset(el) {
+                var _x = 0;
+                var _y = 0;
+                while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+                    _x += el.offsetLeft;
+                    _y += el.offsetTop;
+                    el = el.parentNode;
+                }
+                return { top: _y, left: _x };
+            }
+
+         
+        </script>
+          <script language="javascript" type="text/javascript">
+
+              var objTemp, objTemp1, objTemp2;
+
+              function FnMouseover(id, objTd) {
+                  if (objTemp && objTemp1) {
+                      FnResursiveSlideCall(objTemp.rows.length, 0, objTemp.id, 0)
+                      // objTemp.style.display = "none";
+                      objTemp1.firstChild.className = "menu";
+                  }
+
+                  if (!document.getElementById(id))
+                      return false;
+                  objPosition = getOffset(objTd)
+                  var intPosition = objPosition.left;
+                  var intTop = objPosition.top-81;
+                  objTd.firstChild.className = "menuselected";
+                  objTemp1 = objTd;
+
+                  with (document.getElementById(id)) {
+                      style.display = "";
+                      style.width = "175px";
+                      style.position = "absolute";
+                      style.left = intPosition + "px";
+                      style.top = intTop + "px";
+                  }
+                  FnResursiveSlideCall(document.getElementById(id).rows.length, 0, id, 50)
+                  objTemp = document.getElementById(id);
+              }
+
+            
+              function DivFormLayout() {
+                  document.getElementById("DivFormLayout").style.width = document.body.clientWidth + "px";
+                  document.getElementById("DivFormLayout").style.height = (document.getElementsByTagName("HTML")[0].clientHeight - 155) + "px";
+              }
+
+
+              function FnResursiveSlideCall(intLength, intPos, obj, intNeed) {
+                  var Tempobj = document.getElementById(obj).rows;
+                  if (intPos < intLength) {
+                      if (!Tempobj[intPos])
+                          return;
+                      if (intNeed) {
+                          // document.getElementById(obj).style.display = "";
+                      }
+                      Tempobj[intPos].style.display = (intNeed) ? "" : "none";
+                      intPos = intPos + 1;
+                      window.setTimeout("FnResursiveSlideCall(" + intLength + ", " + (intPos) + ",'" + obj + "'," + intNeed + ")", 50);
+                  }
+                  else {
+                      document.getElementById(obj).style.display = (intNeed) ? "" : "none";
+                  }
+
+              }
+
+              function FnMouseout() {
+              }
+
+              function FnSetBodyHeightAndWidth() {
+                  document.body.style.width = document.body.clientWidth + "px";
+                  document.body.style.height = document.getElementsByTagName("HTML")[0].clientHeight + "px";
+                  window.onresize = function () { FnSetBodyHeightAndWidth(); }
+              }
+
+              function FilterText(objText, strId) {
+                  var objSelect = document.getElementById(strId);
+                  var TypedValue = objText.value;
+
+                  for (var intLoop = 0; intLoop < objSelect.options.length; intLoop++) {
+
+                      if (TypedValue.length < objSelect.options[intLoop].text.toString().length) {
+                          var strValue = objSelect.options[intLoop].text.toString().substring(0, TypedValue.length)
+                          if (TypedValue.toUpperCase() == strValue.toUpperCase()) {
+                              objSelect.selectedIndex = intLoop;
+                              break;
+                          }
+                      }
+
+                  }
+
+              }
+
+
+              function CheckAll(obj) {
+                  var objCheckbox = document.getElementsByTagName("INPUT");
+                  var chkTrue = (obj.checked);
+                  for (var intLoop = 0; intLoop < objCheckbox.length; intLoop++) {
+                      with (objCheckbox[intLoop]) {
+                          if (type.toString() == "checkbox") {
+                              checked = chkTrue;
+                          }
+                      }
+                  }
+              }
+
+              function FnMoreButton() {
+                  try {
+                      var objButton = document.getElementById("ctl00_MainContent_More_Button")
+                      objButton.onclick = function () {
+                          objButton.parentNode.onmouseover();
+                          if (window.event) {
+                              window.event.returnValue = false
+                              return false;
+                          }
+                          else {
+                              event.returnValue = false;
+                          }
+                          return false;
+                      }
+                  }
+                  catch (e) {
+                      //alert("");
+                  }              }
+              
+    </script>
+
+<style type="text/css">
+
+#menuOnNav:hover{
+
+color:#470202;
+}
+
+
+/* The side navigation menu */
+.sidenav {
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: #111; /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #c9c9cf;
+    display: block;
+    transition: 0.3s;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+/* Position and style the close button (top right corner) */
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s;
+    padding: 20px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+}
+    </style>
+
+
+
+        <asp:ContentPlaceHolder id="HeadContent" runat="server">
+        </asp:ContentPlaceHolder>
+
+    </head>
+    <body bgcolor="white" alink="#000000" >
+        <!--<div id="print-container" style="display:none"></div>-->
+        <!--<div id="site-container" style ="width:100%;height:100%;">-->
+
+
+        <!-- Just an image -->
+
+				
+		
+
+
+		
+<form id="form1" runat="server" >
+
+     <nav class="navbar navbar-inverse navbar-fixed-top">
+
+        <div class="container-fluid">
+                
+                <div class="row" style="padding:5px;">
+			
+			<a style="margin-left:-13px;" class="navbar-brand"><img id="logo" src="/images/TaskThroughLogo.png" width="70" height="45" alt=""></a>
+			
+                                 
+                         <span style="float:left;"><gsp:Log runat="server" id="LogId"></gsp:Log></span>
+                            
+
+               <div id="mySidenav" class="sidenav" style="background-color:#ebebeb";">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNavMaster()"><span style="margin-top:5px; color:black;" class="glyphicon glyphicon-remove"></span></a>
+   <center><div runat="server" id="MainMenu" > </div></center>
+</div>
+
+<!-- Use any element to open the sidenav -->
+<span id="menuOnNav" style="margin-top:-63px; margin-right:-40px; float:right;" class ="glyphicon glyphicon-th btn btn-lg" onclick="openNavMaster()">MENU</span> 
+
+
+               
+		
+                                      
+               
+
+                    
+            </div>
+
+            
+         </div>     
+
+
+                             			
+                    </nav>
+
+
+<style>
+
+
+</style>
+
+
+
+
+<script>
+
+function openNavMaster() {
+    document.getElementById("mySidenav").style.width = "100%";
+    document.getElementById("mySidenav").style.width = "100%";
+}
+
+
+function closeNavMaster() {
+    document.getElementById("mySidenav").style.width = "0";
+}
+
+</script/> 
+
+
+
+
+
+
+			
+<%--         <nav class="navbar navbar-inverse navbar-fixed-top">
+  <a class="navbar-brand"  href="#">
+    <img src="/images/TaskThroughLogo.png" width="90" height="60" alt="">
+  </a>
+
+				
+	<div>
+           <gsp:Log runat="server" id="LogId" ></gsp:Log>
+        </div>   
+				<div class="col-md-1">
+        </div>
+      <div class="col-md-9" runat="server" id="MainMenu" >
+        </div>
+      <div runat="server" id="SubMenu" >
+      </div>
+					
+
+ </nav>--%>           
+
+
+                                        <div >
+
+                                            <asp:ContentPlaceHolder ID="MainContent" runat="server"/>
+                                            <div id="calenderTable" >
+                                               <div id="calenderTableHead" style="vertical-align:middle; width:100%; ">
+                                                 <div>
+                                                   <div align="center" style="vertical-align:middle; width:100%; ">
+	                                             <select onChange="showCalenderBody(
+                                                           createCalender(document.getElementById('selectYear').value,
+	                                                   this.selectedIndex, false));"
+                                                           id="selectMonth">
+	                                                      <option value="0">Jan</option>
+	                                                      <option value="1">Feb</option>
+	                                                      <option value="2">Mar</option>
+	                                                      <option value="3">Apr</option>s
+	                                                      <option value="4">May</option>
+	                                                      <option value="5">Jun</option>
+	                                                      <option value="6">Jul</option>
+	                                                      <option value="7">Aug</option>
+	                                                      <option value="8">Sep</option>
+	                                                      <option value="9">Oct</option>
+	                                                      <option value="10">Nov</option>
+	                                                      <option value="11">Dec</option>
+	                                                  </select>
+                                                    </div>
+	                                            <select style="width:100%;" onChange="showCalenderBody(createCalender(this.value, document.getElementById('selectMonth').selectedIndex, false));" id="selectYear">
+	                                            </select>
+                                                   <div align="center" style="vertical-align:top; width:100%;">
+	                                            <a href="#" onClick="closeCalender();">
+                                                      <font color="white" size="+1">X</font>
+                                                    </a>
+	                                           </div>
+	                                        </div>
+                                               </div>
+                                                <table><tbody id="calenderTableDays">
+                                                 <tr>
+                                                   <td>Sun</td><td>Mon</td><td>Tue</td><td>Wed</td>
+                                                   <td>Thu</td><td>Fri</td><td>Sat</td>
+                                                 </tr>
+                                               </tbody>
+                                                      <tbody id="calender"></tbody>
+                                                </table>
+                                            </div>
+                     </div>
+
+
+    <%-- <div >
+
+                                            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server"/>
+                                            <div id="calenderTable" >
+                                               <div id="calenderTableHead">
+                                                 <div>
+                                                   <div align="center">
+	                                             <select onChange="showCalenderBody(
+                                                           createCalender(document.getElementById('selectYear').value,
+	                                                   this.selectedIndex, false));"
+                                                           id="selectMonth">
+	                                                      <option value="0">Jan</option>
+	                                                      <option value="1">Feb</option>
+	                                                      <option value="2">Mar</option>
+	                                                      <option value="3">Apr</option>
+	                                                      <option value="4">May</option>
+	                                                      <option value="5">Jun</option>
+	                                                      <option value="6">Jul</option>
+	                                                      <option value="7">Aug</option>
+	                                                      <option value="8">Sep</option>
+	                                                      <option value="9">Oct</option>
+	                                                      <option value="10">Nov</option>
+	                                                      <option value="11">Dec</option>
+	                                                  </select>
+                                                    </div>
+	                                            <select onChange="showCalenderBody(createCalender(this.value, document.getElementById('selectMonth').selectedIndex, false));" id="selectYear">
+	                                            </select>
+                                                   <div align="center">
+	                                            <a href="#" onClick="closeCalender();">
+                                                      <font color="white" size="+1">X</font>
+                                                    </a>
+	                                           </div>
+	                                        </div>
+                                               </div>
+                                               <div id="calenderTableDays">
+                                                 <div>
+                                                   <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+                                                   <div>Thu</div><div>Fri</div><div>Sat</div>
+                                                 </div>
+                                               </div>
+                                               <div id="calender"></div>
+                                            </div>
+                     </div>--%>
+
+
+
+
+        </form>
+            <!--</div>-->
+
+		
+ 
+    </body>
+
+	
+ 
+</html>

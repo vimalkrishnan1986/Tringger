@@ -1,0 +1,197 @@
+﻿.calenderimg
+{
+    width:16;
+    height:16; 
+    
+}
+.label
+{
+    color:White;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:12px;  
+}
+
+.allfont
+{
+    color:black;
+    font-family:Calibri;
+    font-size:12px; 
+}
+
+
+.gridviewlink
+{
+    
+}
+.menu
+{
+    background-color:#444444; 
+    color:White;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px; 
+    cursor:pointer;
+    width:150px;
+}
+.menuselected
+{
+    color:#FBB917;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px;
+    cursor:pointer;
+}
+.submenu
+{
+     background-color:#444444; 
+     color:White;
+     font-family:Calibri;
+     font-weight:bolder; 
+     font-size:12px;
+     cursor:pointer;
+}
+
+.submenuselect
+{
+   background-color:#444444; 
+    color:#FBB917;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:12px;
+    cursor:pointer; 
+}
+.submenuborder 
+{
+    border:3px ridge lightgray;
+    border-top:0;
+    z-index:10000; 
+}
+ 
+.formlayout
+{
+    background-color:#254117;
+    border:4px ridge #306EFF; 
+}
+
+.featuresmenu
+{
+     background-color:#387C44;
+}
+
+.signin
+{
+    color:White;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:14px; 
+}
+.menuborder
+{
+    border-bottom:3px ridge lightgray;
+    font-family:Calibri;
+}
+.GridCaption
+{
+    border:1px solid black;
+    padding:5px;
+    background-color:#387C44;;
+    font-family:calibri !important;
+    text-decoration:none;
+    color:black;
+              
+}
+
+a
+{
+    padding:4px;
+    color:White;
+    font-family:Calibri;
+    font-size:12px;
+    text-align:left;
+    
+}
+
+.GridValue
+{
+    padding:4px;
+    color:White;
+    border:1px solid #4E9258;
+    font-family:Calibri;
+    font-size:12px;
+    text-align:left;
+              
+}
+.panelheading
+{
+    background-Image:Url("../Images/redglow.png");
+    color:White;
+    font-family:Calibri;
+    height:76px;
+    font-weight:bolder; 
+    font-size:24px; 
+              
+}
+.heading
+{
+    color:white;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:18px; 
+              
+}
+
+.pageheading          
+{
+    color:white;
+    font-family:Calibri;
+    font-weight:bolder; 
+    font-size:18px; 
+    
+}
+.gridtd
+{
+    background-color:#444444;
+    border:1px solid gray;
+}
+.msgstyle
+{
+    color:yellow;
+    font-family:Calibri;
+    font-size:12px;
+    font-weight:bolder; 
+                
+}
+                        
+.warningstyle
+{
+    color:DarkOliveGreen;
+    font-family:Calibri;
+    font-size:12px; 
+                
+}
+            
+.bgstyle
+{
+    background-color:	#4E9258;
+}
+            
+.divformlayout
+{
+    background-color:	#4E9258;        
+    width:100%;
+    height:500px;
+    overflow-y:auto;
+}
+       
+.leftside
+{
+    background-color:#D6DDEF;
+}        
+
+
+#rightside
+{
+    background-color:#D6DDEF;
+}
+
