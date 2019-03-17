@@ -10,50 +10,26 @@ using System.Web.UI.HtmlControls;
 
 public partial class MainMasterPage : System.Web.UI.MasterPage
 {
-
-
-    protected void Page_Init(object sender, EventArgs e)
-    {
-
-        if (string.IsNullOrEmpty(Convert.ToString(Session["Login_Id"])))
-        {
-            foreach (string Key in Request.Cookies.Keys)
-            {
-                Session[Key] = Convert.ToString(Request.Cookies[Key].Value);
-            }
-
-        }
-
-        if (string.IsNullOrEmpty(Convert.ToString(Session["Login_Id"])))
-        {
-            Response.Write("");
-            Response.End();
-        }
-
-    }
+    const string _adminKey = "Admin";
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        if (Convert.ToString(Session["Login_Id"]).Trim() == "")
-        {
-
-            Response.Redirect("~/Default.aspx");
-        }
         if (!Page.IsPostBack)
         {
+            SessionHelper.AddtoSession<bool>(_adminKey, true);
             FnMenu();
         }
     }
     protected void FnMenu()
     {
-        string strcon = ConfigurationManager.AppSettings["connectionstring"];
-        SqlConnection con = new SqlConnection(strcon);
+
+        SqlConnection con = new SqlConnection(Constants.ConnectionString);
         con.Open();
         DataTable dataTable = new DataTable();
         DataSet ds = new DataSet();
         SqlDataAdapter ad = new SqlDataAdapter();
         SqlCommand cmd;
-        if (Convert.ToBoolean(Session["Admin"]))
+        if (SessionHelper.GetSessionValue<bool>(_adminKey))
         {
             cmd = new SqlCommand("select Module_Name,Module_Id from Module_Master where Is_Active=1 and Module_Name != 'Time Sheet Page' ", con);
         }
@@ -78,7 +54,7 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
             DataSet ds1 = new DataSet();
             SqlDataAdapter ad1 = new SqlDataAdapter();
             SqlCommand cmd1;
-            if (Convert.ToBoolean(Session["Admin"]))
+            if (SessionHelper.GetSessionValue<bool>(_adminKey))
             {
                 cmd1 = new SqlCommand("select  * from Sub_Module where Module_Name='" + ModuleID + "' ", con);
             }
@@ -91,13 +67,13 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
             ad1.SelectCommand = cmd;
             ad1.Fill(ds1);
             dataTable1 = ds1.Tables[0];
-           
-                strMenu = strMenu + "<div class=\"btn-group dropdown\" > <button style =\"width: 150px; background-color:white; margin-right:5px; margin-bottom:5px; font-size:small; border-radius:5px; " + "type=\"button\" class=\"btn btn-danger \" data-toggle=\"dropdown\">" + ds.Tables[0].Rows[i]["Module_Name"].ToString() + "<span class=\"caret\"></span></button><ul style=\"background-color:#eff0f2; margin-top:5px; padding:10px; border-width:0px;; font-size:small; text-align:left;\" class=\"dropdown-menu\" >";
-                for (int k = 0; k < dataTable1.Rows.Count; k++)
-                {
-                    strMenu += "<li><a href =\".." + "/" + ds1.Tables[0].Rows[k]["File_Name"].ToString() + "\" class=\"btn btn-default\" style=\"background-color:white; color:#7c7e82; padding:0px; margin-top:0px; margin-bottom:5px; font-size:small; text-align:left;\">" + ds1.Tables[0].Rows[k]["Sub_Module_Name"].ToString() + "</a></li>";
-               
-               }
+
+            strMenu = strMenu + "<div class=\"btn-group dropdown\" > <button style =\"width: 150px; background-color:white; margin-right:5px; margin-bottom:5px; font-size:small; border-radius:5px; " + "type=\"button\" class=\"btn btn-danger \" data-toggle=\"dropdown\">" + ds.Tables[0].Rows[i]["Module_Name"].ToString() + "<span class=\"caret\"></span></button><ul style=\"background-color:#eff0f2; margin-top:5px; padding:10px; border-width:0px;; font-size:small; text-align:left;\" class=\"dropdown-menu\" >";
+            for (int k = 0; k < dataTable1.Rows.Count; k++)
+            {
+                strMenu += "<li><a href =\".." + "/" + ds1.Tables[0].Rows[k]["File_Name"].ToString() + "\" class=\"btn btn-default\" style=\"background-color:white; color:#7c7e82; padding:0px; margin-top:0px; margin-bottom:5px; font-size:small; text-align:left;\">" + ds1.Tables[0].Rows[k]["Sub_Module_Name"].ToString() + "</a></li>";
+
+            }
 
             strMenu += "</ul></div>";
         }
@@ -106,7 +82,7 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
         //strMenu += strMenu2+"</ul></div>";
         //strMenu = strMenu + "</tr></table>";
         //strMenu = "<center>" + strMenu2 + "</center><br />"+ strMenu + "</div>";
-        strMenu = strMenu + strMenu2 +"</div>";
+        strMenu = strMenu + strMenu2 + "</div>";
         MainMenu.InnerHtml = Convert.ToString(strMenu);
         //SubMenu.InnerHtml = Convert.ToString(strSubMenu);
         con.Close();
