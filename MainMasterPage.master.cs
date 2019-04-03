@@ -20,8 +20,10 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
             FnMenu();
         }
     }
+
     protected void FnMenu()
     {
+        //needs to be altered
 
         SqlConnection con = new SqlConnection(Constants.ConnectionString);
         con.Open();
