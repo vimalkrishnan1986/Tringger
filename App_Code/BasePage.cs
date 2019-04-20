@@ -19,7 +19,7 @@ public class BasePage : Page
     protected string _loginId { get; private set; }
     const string _loginIdKey = "Login_Id";
 
-    protected string connectionstring
+    public static string connectionstring
     {
         get
         {
@@ -27,6 +27,16 @@ public class BasePage : Page
         }
     }
 
+
+    protected T GetQueryStringValue<T>(String key)
+    {
+        if (Request.QueryString[key] == null)
+        {
+            return default(T);
+
+        }
+        return (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFromInvariantString(Request.QueryString[key]);
+    }
 
     protected virtual void Page_Init(object sender, EventArgs e)
     {
@@ -49,6 +59,12 @@ public class BasePage : Page
         GridObject.DataSource = FillTable(strQuery);
         GridObject.DataBind();
 
+    }
+
+    public void BindDataSet(string strQuery, DataList DataListObject)
+    {
+        DataListObject.DataSource = FillTable(strQuery);
+        DataListObject.DataBind();
     }
 
     protected void BindListBox(string strQuery, ListBox ListBoxObject)
@@ -143,7 +159,7 @@ public class BasePage : Page
         }
     }
 
-    public DataTable FillTable(string strQuery, CommandType commandType = CommandType.Text)
+    public static DataTable FillTable(string strQuery, CommandType commandType = CommandType.Text)
     {
 
         DataTable objTable = new DataTable();

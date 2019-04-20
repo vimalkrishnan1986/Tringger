@@ -13,9 +13,23 @@ public static class SessionHelper
     public static T GetSessionValue<T>(String key)
     {
         object sessionVal = HttpContext.Current.Session[key];
+
         if (sessionVal == null)
         {
             throw new KeyNotFoundException(key);
+        }
+
+        return (T)TypeDescriptor.GetConverter(typeof(T))
+            .ConvertFromInvariantString(sessionVal.ToString());
+    }
+    public static T GetSessionValue<T>(String key, out T defaultValue)
+    {
+        object sessionVal = HttpContext.Current.Session[key];
+        defaultValue = default(T);
+        if (sessionVal == null)
+        {
+
+            return defaultValue;
         }
 
         return (T)TypeDescriptor.GetConverter(typeof(T))

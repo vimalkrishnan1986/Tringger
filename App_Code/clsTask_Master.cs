@@ -13,7 +13,6 @@ using System.ComponentModel;
 public class clsTask_Master : BasePage
 {
 
-
     protected string ReturnSubString(string strValue, int intLength)
     {
         if (strValue.Length > intLength)
@@ -22,8 +21,6 @@ public class clsTask_Master : BasePage
         }
         return strValue;
     }
-
-
 
 
     public DataTable ExecuteProcedure(List<SqlParameter> sqlParams, string ProcedureName)
@@ -64,7 +61,6 @@ public class clsTask_Master : BasePage
         }
     }
 
-   
 
     public string FnFormatCondition(string strValue, string strField, string strExists, string Session_Name)
     {
@@ -77,83 +73,7 @@ public class clsTask_Master : BasePage
         return strReturn;
     }
 
-    public void Company_Unit_Master_Company_Unit_Name(DropDownList Company_Unit_Name, HtmlTableCell tdMessage, string strValue)
-    {
-        try
-        {
-            Company_Unit_Name.Items.Clear();
-            ListItem objList = new ListItem();
-            objList.Text = "---Select---";
-            objList.Value = "";
-            Company_Unit_Name.Items.Add(objList);
-            string strWhere = string.Empty;
-
-            if (!Convert.ToBoolean(HttpContext.Current.Session["Admin"]))
-            {
-                strWhere = " Where Unit_Id=" + Convert.ToString(Session["Unit_Id"]);
-            }
-
-            BindDropDownList
-            (
-                "select [Unit_Id], [Company_Unit_Name]  from Company_Unit_Master  " + strWhere,
-                Company_Unit_Name
-            );
-
-            Company_Unit_Name.SelectedValue = strValue;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            //
-        }
-        catch (Exception err)
-        {
-            WarningMessage("Error occurred in method of 'Company_Unit_Master_Company_Unit_Name' error details:" + Convert.ToString(err.Message), tdMessage);
-        }
-    }
-
-    public void Department_Master_Department_Name(DropDownList Department_Name, HtmlTableCell tdMessage, string strValue)
-    {
-        try
-        {
-            BindDropDownList
-            (
-                "select [Department_Id], [Department_Name]  from Department_Master where Entered_Unit='" + Session["Unit_Id"].ToString() + "' ",
-                Department_Name
-            );
-
-            Department_Name.SelectedValue = strValue;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            //
-        }
-        catch (Exception err)
-        {
-            WarningMessage("Error occurred in method of 'Department_Master_Department_Name' error details:" + Convert.ToString(err.Message), tdMessage);
-        }
-    }
-
-    public void Designation_Master_Designation_Name(DropDownList Designation_Name, HtmlTableCell tdMessage, string strValue)
-    {
-        try
-        {
-            BindDropDownList
-            (
-                "select [Designation_Id], [Designation_Name]  from Designation_Master where Entered_Unit='" + Session["Unit_Id"].ToString() + "'",
-                Designation_Name
-            );
-
-            Designation_Name.SelectedValue = strValue;
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            //
-        }
-        catch (Exception err)
-        {
-            WarningMessage("Error occurred in method of 'Designation_Master_Designation_Name' error details:" + Convert.ToString(err.Message), tdMessage);
-        }
-    }
+   
 
     public string FnGetDate(DateTime dateValue)
     {

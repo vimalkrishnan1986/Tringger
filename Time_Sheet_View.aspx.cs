@@ -10,10 +10,13 @@ using System.Web.UI.WebControls;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Linq;
-
+using System.ComponentModel;
+using System.Data.SqlClient;
 public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 {
     const string _loginIdKey = "Login_Id";
+    const string _departmentKey = "IsInitialDepartment";
+
 
     protected override void Page_Init(object sender, EventArgs e)
     {
@@ -40,7 +43,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         {
             DateFrom.Text = FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30));// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
             DateTo.Text = FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30));// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
-            Company_Unit_Master_Company_Unit_Name(Company_Unit_Name, tdMessage, Convert.ToString(Session["Company_Unit_Name"]));
+            compnay_dropDown.DataBind();
             Staff_Master_Staff_Name();
             ProjectIDLoad();
 
@@ -57,6 +60,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             }
         }
     }
+
+
     public DateTime GetDate2()
     {
         DateTime T = DateTime.UtcNow.AddHours(5).AddMinutes(30);
@@ -260,250 +265,208 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
         }
     }
+
     protected void ShiftPendingTasks()
     {
-        string This = "SELECT t1.* from Time_Sheet_Master t1 join Staff_Master t2 on t1.Staff_Name = t2.Staff_Id where (t1.Staff_Name = '" + Convert.ToString(Session["Login_Id"]) + "' or t2.Level=101)  and Status in (1,2,6) and Cast(Task_Date AS date) < CAST('" + GetDate2() + "' AS DATE) ";
-
-        DataTable objTable = FillTable(This);
-
-        int RowsCount = objTable.Rows.Count;
-        for (int i = 0; i < RowsCount; i++)
-        {
-            string Remarks = objTable.Rows[i]["Remarks"].ToString();
-
-            string ThisTimeSheetID = objTable.Rows[i]["Time_Sheet_Id"].ToString();
-            string LastDate = Convert.ToDateTime(objTable.Rows[i]["Task_Date"]).ToString("MM/dd/yyyy");
-            string LastTime = objTable.Rows[i]["Start_Time"].ToString();
-            string NewRemarks = "<br/>" + Remarks + "<br/>----------------<br/><i><b>Activity Replanned from " + LastDate + "-" + LastTime.Substring(0, 5) + "<b/></i><br/>----------------<br/><br/>";
-            string updtQry2 = "Insert into Replans (TimeSheetId, LastDate, LastTime) values ('" + ThisTimeSheetID + "','" + LastDate + "', '" + LastTime + "')";
-            Sql_ExecuteNoNQuery(updtQry2);
-            string updtQry = "update Time_Sheet_Master set Task_Date =cast('" + GetDate2() + "'  as date), Remarks='" + NewRemarks + "', Replan='r' where Time_Sheet_Id='" + ThisTimeSheetID + "'";
-
-            Sql_ExecuteNoNQuery(updtQry);
-
-            if (!string.IsNullOrEmpty(objTable.Rows[i]["task_Id"].ToString()))
-            {
-                DataTable objTable2 =FillTable("Select * from Task_Master where task_Id = '" + objTable.Rows[i]["task_Id"].ToString() + "'");
-                string LastTaskStartTime = objTable2.Rows[0]["Start_Date"].ToString();
-                string LastTaskEndTime = objTable2.Rows[0]["End_Date"].ToString();
-                DateTime LastStartTimeDate = Convert.ToDateTime(LastTaskStartTime);
-                DateTime TodaysStartTimeDate = LastStartTimeDate.AddDays(1.0);
-                DateTime LastEndTimeDate = Convert.ToDateTime(LastTaskEndTime);
-                DateTime TodaysEndTimeDate = LastEndTimeDate.AddDays(1.0);
-                //Response.Write(LastTaskStartTime + "----------" + TodaysStartTimeDate + "-------------------" + TodaysEndTimeDate + "------" + LastDate + "------" + LastTime + "--------" + LastTaskStartTime + "--------" + LastTaskEndTime);
-                //Response.End();
-                string updtQry3 = "Update Replans set TaskId='" + objTable.Rows[i]["task_Id"].ToString() + "',  TaskLastDate='" + LastTaskStartTime + "' where  TimeSheetID='" + ThisTimeSheetID + "' and LastDate='" + LastDate + "' and LastTime='" + LastTime + "'";
-                Sql_ExecuteNoNQuery(updtQry3);
-
-                string updtQry4 = "update Task_Master set Start_Date ='" + TodaysStartTimeDate.ToString() + "', End_Date='" + TodaysEndTimeDate.ToString() + "' where task_Id='" + objTable.Rows[i]["task_Id"].ToString() + "'";
-
-                Sql_ExecuteNoNQuery(updtQry4);
-
-            }
-        }
+        const string query = "Shiftpendingtasks";
+        DataAccess.ExecuteNonQuery(query, CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@loginId", _loginId), new SqlParameter("@date", GetIstDate()) });
     }
+
+
     protected void CheckForUnAssignedOrders()
     {
-        if (Session["IsInitialDepartment"].ToString() != "0")
-        {
-            string This = "select * from Enquiries where  Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode= 1 and Status !=5 ";
-            DataTable objTable = FillTable(This); 
-            if (objTable.Rows.Count > 0)
-            {
-                UnAssignedDiv.Visible = true;
-                UnAssigneCount.Text = objTable.Rows.Count.ToString();
-            }
-            else
-            {
-                UnAssigneCount.Text = objTable.Rows.Count.ToString();
-                UnAssignedDiv.Visible = false;
-            }
-        }
-        else
+
+        if (!SessionHelper.GetSessionValue<bool>(_departmentKey))
         {
             CheckForAllUnAssignedProcessOrders();
+            return;
+        }
+
+        int count = GetEnquiries(GetDate2(), 1, 5).Rows.Count;
+        UnAssignedDiv.Visible = count > 0;
+        if (UnAssignedDiv.Visible)
+        {
+            UnAssigneCount.Text = count.ToString();
         }
     }
+
     protected void CheckForAllUnAssignedProcessOrders()
     {
 
-        string This = "select * from Enquiries where  Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode= 3 and Status !=5 ";
-        DataTable objTable = FillTable(This);
-        if (objTable.Rows.Count > 0)
-        {
-            UnAssignedProcessDiv.Visible = true;
-            UnAssignedProcessCount.Text = objTable.Rows.Count.ToString();
-        }
-        else
-        {
-            UnAssignedProcessCount.Text = objTable.Rows.Count.ToString();
-            UnAssignedProcessDiv.Visible = false;
-        }
+        int count = GetEnquiries(GetDate2(), 3, 5).Rows.Count;
+        UnAssignedProcessDiv.Visible = count > 0;
 
+        if (UnAssignedProcessDiv.Visible)
+        {
+            UnAssignedProcessCount.Text = count.ToString();
+        }
     }
+
+
     protected void CheckForUnAssignedDeliveries()
     {
-        //Response.Write(Session["IsFinalDepartment"].ToString());
-        if (Session["IsFinalDepartment"].ToString() != "0")
+        if (!SessionHelper.GetSessionValue<bool>(_departmentKey))
         {
-            //Response.Write(Session["IsFinalDepartment"].ToString() + " Is available<br />");
+            CheckForAllUnAssignedProcessOrders();
+            return;
+        }
+        //Response.Write(Session["IsFinalDepartment"].ToString());
 
-            string ThisStaff = "";
-            string This = "select * from Enquiries where Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode=2 and Status !=5 ";
+        //Response.Write(Session["IsFinalDepartment"].ToString() + " Is available<br />");
+
+        string ThisStaff = "";
+        string This = "select * from Enquiries where Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode=2 and Status !=5 ";
 
 
-            DataTable objTable1 = FillTable(This);
+        DataTable objTable1 = FillTable(This);
 
-            if (objTable1.Rows.Count > 0)
+        if (objTable1.Rows.Count > 0)
+        {
+            string This2 = "select t1.*, t2.PostCode, t3.Band, t2.Latitude, t2.Longitude from Enquiries t1 join tblLeadMaster t2 on t1.LeadId = t2.Lead_Id join PincodeBandAllocate t3 on t2.Pincode = (Select pincode from pincodes where pinid = t3.PinId and Entered_Unit ='" + Session["Unit_Id"].ToString() + "') where Cast (t1.Time as date) <= Cast ('" + GetDate2() + "' as date) and t1.BMode=2 and t1.Status !=5 ";
+
+            //Response.Write(This2); Response.End();
+            DataTable objTable = FillTable(This2);
+            if (objTable.Rows.Count > 0)
             {
-                string This2 = "select t1.*, t2.PostCode, t3.Band, t2.Latitude, t2.Longitude from Enquiries t1 join tblLeadMaster t2 on t1.LeadId = t2.Lead_Id join PincodeBandAllocate t3 on t2.Pincode = (Select pincode from pincodes where pinid = t3.PinId and Entered_Unit ='" + Session["Unit_Id"].ToString() + "') where Cast (t1.Time as date) <= Cast ('" + GetDate2() + "' as date) and t1.BMode=2 and t1.Status !=5 ";
-
-                //Response.Write(This2); Response.End();
-                DataTable objTable = FillTable(This2);
-                if (objTable.Rows.Count > 0)
+                //Response.Write("<br />" + This2 + "Available");
+                for (int i = 0; i < objTable.Rows.Count; i++)
                 {
-                    //Response.Write("<br />" + This2 + "Available");
-                    for (int i = 0; i < objTable.Rows.Count; i++)
+                    string PostCode = objTable.Rows[i]["PostCode"].ToString().TrimEnd();
+                    string Band = objTable.Rows[i]["Band"].ToString().TrimEnd();
+                    string Lat = objTable.Rows[i]["Latitude"].ToString().TrimEnd();
+                    string Long = objTable.Rows[i]["Longitude"].ToString().TrimEnd();
+                    string DMode = objTable.Rows[i]["DMode"].ToString().TrimEnd();
+                    string ThisTaskId = objTable.Rows[i]["Task_Id"].ToString().TrimEnd();
+                    string SubStatus = objTable.Rows[i]["Sub_Status"].ToString();
+                    string RejectedStaff = "0";
+                    string flag = objTable.Rows[i]["flag"].ToString().TrimEnd();
+                    string QueryWithAttendance = "";
+                    string QueryWithAttendance55 = "";
+                    string QueryWithAttendance66 = "";
+                    if (flag == "r")
                     {
-                        string PostCode = objTable.Rows[i]["PostCode"].ToString().TrimEnd();
-                        string Band = objTable.Rows[i]["Band"].ToString().TrimEnd();
-                        string Lat = objTable.Rows[i]["Latitude"].ToString().TrimEnd();
-                        string Long = objTable.Rows[i]["Longitude"].ToString().TrimEnd();
-                        string DMode = objTable.Rows[i]["DMode"].ToString().TrimEnd();
-                        string ThisTaskId = objTable.Rows[i]["Task_Id"].ToString().TrimEnd();
-                        string SubStatus = objTable.Rows[i]["Sub_Status"].ToString();
-                        string RejectedStaff = "0";
-                        string flag = objTable.Rows[i]["flag"].ToString().TrimEnd();
-                        string QueryWithAttendance = "";
-                        string QueryWithAttendance55 = "";
-                        string QueryWithAttendance66 = "";
-                        if (flag == "r")
+                        string GetRejectedStaff = "select Staff_Name from time_Sheet_Master where Status=7 and Task_Id ='" + ThisTaskId + "'";
+                        DataTable objDataTableStatus883 = FillTable(GetRejectedStaff);
+                        if (objDataTableStatus883.Rows.Count > 0)
                         {
-                            string GetRejectedStaff = "select Staff_Name from time_Sheet_Master where Status=7 and Task_Id ='" + ThisTaskId + "'";
-                            DataTable objDataTableStatus883 = FillTable(GetRejectedStaff);
-                            if (objDataTableStatus883.Rows.Count > 0)
-                            {
-                                RejectedStaff = objDataTableStatus883.Rows[0]["Staff_Name"].ToString();
-                            }
-                            else
-                            {
-                                RejectedStaff = "0";
-                            }
-                        }
-
-
-                        if (RejectedStaff != "0")
-                        {
-                            QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "' and t1.FirstStaff_Id != '" + RejectedStaff + "'";
-
-
+                            RejectedStaff = objDataTableStatus883.Rows[0]["Staff_Name"].ToString();
                         }
                         else
                         {
-                            QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
-
-
-                        }
-
-                        DataTable objDataTableStatus553 = FillTable(QueryWithAttendance55);
-                        if (objDataTableStatus553.Rows.Count > 0)
-                        {
-
-                            ThisStaff = objDataTableStatus553.Rows[0]["FirstStaff_Id"].ToString();
-                        }
-                        else
-                        {
-                            if (Band != "0")
-                            {
-
-                                if (RejectedStaff != "0")
-                                {
-                                    QueryWithAttendance = "SELECT top 1 Min(Least) as 'Low', t1.Staff_Name, t1.Department_Name FROM TodayLeastJobsWithDepartment t1 join VW_Active_Staff_Master t2 on t1.Staff_Name= t2.Staff_Id where t1.Department_Name= '" + Session["IsFinalDepartment"].ToString() + "' and t2.Band ='" + Band + "'  and t1.Staff_Name != '" + RejectedStaff + "' group by t1.Staff_Name, t1.Department_Name Order by Low Asc";
-                                }
-                                else
-                                {
-                                    QueryWithAttendance = "SELECT top 1 Min(Least) as 'Low', t1.Staff_Name, t1.Department_Name FROM TodayLeastJobsWithDepartment t1 join VW_Active_Staff_Master t2 on t1.Staff_Name= t2.Staff_Id where t1.Department_Name= '" + Session["IsFinalDepartment"].ToString() + "' and t2.Band ='" + Band + "' group by t1.Staff_Name, t1.Department_Name Order by Low Asc";
-                                }
-
-
-                                DataTable objDataTableStatus33 = FillTable(QueryWithAttendance);
-                                if (objDataTableStatus33.Rows.Count > 0)
-                                {
-
-                                    ThisStaff = objDataTableStatus33.Rows[0]["Staff_Name"].ToString();
-                                }
-                                else
-                                {
-                                    if (RejectedStaff != "0")
-                                    {
-                                        QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'  and t1.SecStaff_Id != '" + RejectedStaff + "'";
-                                    }
-                                    else
-                                    {
-                                        QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
-                                    }
-
-                                    DataTable objDataTableStatus663 = FillTable(QueryWithAttendance66);
-                                    if (objDataTableStatus663.Rows.Count > 0)
-                                    {
-
-                                        ThisStaff = objDataTableStatus663.Rows[0]["SecStaff_Id"].ToString();
-                                    }
-                                    else
-                                    {
-                                        GetClosestDistanceDriver(Session["IsFinalDepartment"].ToString(), Lat, Long, RejectedStaff);
-                                        ThisStaff = ExceptionDriverHdn.Value;
-
-
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
-                        if (!string.IsNullOrWhiteSpace(ThisStaff))
-                        {
-                            string strQrySubTask11 = "select t1.NextStatus as 'FieldMore_Status_Id', t2.Status_Details, t2.LeadStatusId from tblFieldMoreStatusMaster t1 left outer join tblFieldMoreStatusMaster t2 on t1.NextStatus = t2.FieldMore_Status_Id where t1.FieldMore_Status_Id='" + SubStatus + "'";
-
-
-                            DataTable objDTTaskId211 = FillTable(strQrySubTask11);
-                            if (objDTTaskId211.Rows.Count > 0)
-                            {
-                                string updtQry4 = "update Enquiries set staff_Id='" + ThisStaff + "', BMode=0, Status='" + objDTTaskId211.Rows[0]["LeadStatusId"].ToString() + "', Sub_Status='" + objDTTaskId211.Rows[0]["FieldMore_Status_Id"].ToString() + "' where Task_Id='" + objTable.Rows[i]["task_Id"].ToString() + "'";
-                                Sql_ExecuteNoNQuery(updtQry4);
-                            }
-
-                            string updtQry5 = "update Resource_Allocation_Master set Staff_Name='" + ThisStaff + "' where Task_Name='" + objTable.Rows[i]["task_Id"].ToString() + "'";
-
-                            Sql_ExecuteNoNQuery(updtQry5);
-
-                            string updtQry6 = "update Time_Sheet_Master set Staff_Name='" + ThisStaff + "' where task_Id='" + objTable.Rows[i]["task_Id"].ToString() + "' and Status !=3";
-
-                            Sql_ExecuteNoNQuery(updtQry6);
-                        }
-                        else
-                        {
-
+                            RejectedStaff = "0";
                         }
                     }
-                }
 
-                UnassignedDeliveriesDiv.Visible = true;
-                UnAssignedDeliveryCount.Text = objTable1.Rows.Count.ToString();
+
+                    if (RejectedStaff != "0")
+                    {
+                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "' and t1.FirstStaff_Id != '" + RejectedStaff + "'";
+
+
+                    }
+                    else
+                    {
+                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
+
+
+                    }
+
+                    DataTable objDataTableStatus553 = FillTable(QueryWithAttendance55);
+                    if (objDataTableStatus553.Rows.Count > 0)
+                    {
+
+                        ThisStaff = objDataTableStatus553.Rows[0]["FirstStaff_Id"].ToString();
+                    }
+                    else
+                    {
+                        if (Band != "0")
+                        {
+
+                            if (RejectedStaff != "0")
+                            {
+                                QueryWithAttendance = "SELECT top 1 Min(Least) as 'Low', t1.Staff_Name, t1.Department_Name FROM TodayLeastJobsWithDepartment t1 join VW_Active_Staff_Master t2 on t1.Staff_Name= t2.Staff_Id where t1.Department_Name= '" + Session["IsFinalDepartment"].ToString() + "' and t2.Band ='" + Band + "'  and t1.Staff_Name != '" + RejectedStaff + "' group by t1.Staff_Name, t1.Department_Name Order by Low Asc";
+                            }
+                            else
+                            {
+                                QueryWithAttendance = "SELECT top 1 Min(Least) as 'Low', t1.Staff_Name, t1.Department_Name FROM TodayLeastJobsWithDepartment t1 join VW_Active_Staff_Master t2 on t1.Staff_Name= t2.Staff_Id where t1.Department_Name= '" + Session["IsFinalDepartment"].ToString() + "' and t2.Band ='" + Band + "' group by t1.Staff_Name, t1.Department_Name Order by Low Asc";
+                            }
+
+
+                            DataTable objDataTableStatus33 = FillTable(QueryWithAttendance);
+                            if (objDataTableStatus33.Rows.Count > 0)
+                            {
+
+                                ThisStaff = objDataTableStatus33.Rows[0]["Staff_Name"].ToString();
+                            }
+                            else
+                            {
+                                if (RejectedStaff != "0")
+                                {
+                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'  and t1.SecStaff_Id != '" + RejectedStaff + "'";
+                                }
+                                else
+                                {
+                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
+                                }
+
+                                DataTable objDataTableStatus663 = FillTable(QueryWithAttendance66);
+                                if (objDataTableStatus663.Rows.Count > 0)
+                                {
+
+                                    ThisStaff = objDataTableStatus663.Rows[0]["SecStaff_Id"].ToString();
+                                }
+                                else
+                                {
+                                    GetClosestDistanceDriver(Session["IsFinalDepartment"].ToString(), Lat, Long, RejectedStaff);
+                                    ThisStaff = ExceptionDriverHdn.Value;
+
+
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    if (!string.IsNullOrWhiteSpace(ThisStaff))
+                    {
+                        string strQrySubTask11 = "select t1.NextStatus as 'FieldMore_Status_Id', t2.Status_Details, t2.LeadStatusId from tblFieldMoreStatusMaster t1 left outer join tblFieldMoreStatusMaster t2 on t1.NextStatus = t2.FieldMore_Status_Id where t1.FieldMore_Status_Id='" + SubStatus + "'";
+
+
+                        DataTable objDTTaskId211 = FillTable(strQrySubTask11);
+                        if (objDTTaskId211.Rows.Count > 0)
+                        {
+                            string updtQry4 = "update Enquiries set staff_Id='" + ThisStaff + "', BMode=0, Status='" + objDTTaskId211.Rows[0]["LeadStatusId"].ToString() + "', Sub_Status='" + objDTTaskId211.Rows[0]["FieldMore_Status_Id"].ToString() + "' where Task_Id='" + objTable.Rows[i]["task_Id"].ToString() + "'";
+                            Sql_ExecuteNoNQuery(updtQry4);
+                        }
+
+                        string updtQry5 = "update Resource_Allocation_Master set Staff_Name='" + ThisStaff + "' where Task_Name='" + objTable.Rows[i]["task_Id"].ToString() + "'";
+
+                        Sql_ExecuteNoNQuery(updtQry5);
+
+                        string updtQry6 = "update Time_Sheet_Master set Staff_Name='" + ThisStaff + "' where task_Id='" + objTable.Rows[i]["task_Id"].ToString() + "' and Status !=3";
+
+                        Sql_ExecuteNoNQuery(updtQry6);
+                    }
+                    else
+                    {
+
+                    }
+                }
             }
-            else
-            {
-                UnAssignedDeliveryCount.Text = objTable1.Rows.Count.ToString();
-                UnassignedDeliveriesDiv.Visible = false;
-            }
+
+            UnassignedDeliveriesDiv.Visible = true;
+            UnAssignedDeliveryCount.Text = objTable1.Rows.Count.ToString();
         }
         else
         {
-            CheckForAllUnAssignedProcessOrders();
+            UnAssignedDeliveryCount.Text = objTable1.Rows.Count.ToString();
+            UnassignedDeliveriesDiv.Visible = false;
         }
     }
+
+
     protected void GetClosestDistanceDriver(string Dept, string Lat, string Long, string RejectedStaff)
     {
         string Qry1 = "";
@@ -714,7 +677,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         string IsField = "0";
         string strEmpId = Convert.ToString(Session["Login_Id"]);
         string strWhere = " SELECT * from TimeSheetViewAllDates";
-        Session["Company_Unit_Name"] = Company_Unit_Name.SelectedValue;
+        Session["Company_Unit_Name"] = compnay_dropDown.SelectedValue;
         Session["Staff_Id"] = Staff_Name.SelectedValue;
         strStaff_Id = Staff_Name.SelectedValue;
         Session["DateFrom"] = strSD;
@@ -742,7 +705,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             }
         }
 
-        if (Convert.ToString(Company_Unit_Name.SelectedValue) != "")
+        if (Convert.ToString(compnay_dropDown.SelectedValue) != "")
         {
             strWhere += ((intCheck == 1) ? " AND " : " Where ") + " Company_Unit_Name='" + Convert.ToString(Company_Unit_Name.SelectedItem.Text) + "'";
             strWhere += ((intCheck == 1) ? " AND " : " Where ") + " Task_Date BETWEEN '" + strSD + "'  AND '" + strED + "' ";
@@ -2217,4 +2180,33 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     //{
     //    string insertAttendance="Insert into Attendance_Master ("
     //}
+
+
+    #region static methods
+
+    [DataObjectMethod(DataObjectMethodType.Select)]
+    public static DataTable GetCompany()
+    {
+        const string adminKey = "Admin";
+        const string companyKey = "Company_Unit_Name";
+
+        string query = "select [Unit_Id], [Company_Unit_Name] from Company_Unit_Master";
+
+        if (!SessionHelper.GetSessionValue<bool>(adminKey))
+        {
+            query += "where unit_id=" + SessionHelper.GetSessionValue<string>("unit_id");
+        }
+
+        query += "And Company_Unit_Name='" + SessionHelper.GetSessionValue<string>(companyKey) + "'";
+        return FillTable(query);
+    }
+
+    private static DataTable GetEnquiries(DateTime dateTime, int bmode, int excemptedStatus)
+    {
+        const string query = "Getenquiries";
+        return DataAccess.FillDataSet(query, CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@date", dateTime),
+            new SqlParameter("@bMode", bmode),
+            new SqlParameter("@excepmtedStatus", excemptedStatus) }).Tables[0];
+    }
+    #endregion
 }

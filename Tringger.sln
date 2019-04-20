@@ -7,29 +7,33 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Tringger", ".", "{86E0B5AC-
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.7"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_58571"
-		Debug.AspNetCompiler.PhysicalPath = "H:\.Net Projects\Tringger\"
+		Debug.AspNetCompiler.PhysicalPath = "..\Tringger\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58571\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_58571"
-		Release.AspNetCompiler.PhysicalPath = "H:\.Net Projects\Tringger\"
+		Release.AspNetCompiler.PhysicalPath = "..\Tringger\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_58571\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "58571"
+		SlnRelativePath = "..\Tringger\"
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{86E0B5AC-B123-497D-97DF-311662B882F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{86E0B5AC-B123-497D-97DF-311662B882F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86E0B5AC-B123-497D-97DF-311662B882F5}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{86E0B5AC-B123-497D-97DF-311662B882F5}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
