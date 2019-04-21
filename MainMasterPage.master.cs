@@ -17,8 +17,6 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
     {
         if (!Page.IsPostBack)
         {
-            SessionHelper.AddtoSession<bool>(_adminKey, true);
-            SessionHelper.AddtoSession<string>("Company_Unit_Name", "");
             FnMenu();
         }
     }
@@ -30,10 +28,10 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
         string sql = "GetMenu";
         bool isadmin = false;
         int loginId = 0;
-        loginId = SessionHelper.GetSessionValue<int>(_loginKey, out loginId);
+        loginId = SessionHelper.GetSessionValue<int>(_loginKey,  loginId);
 
         SqlParameter[] sqlParameters = new SqlParameter[] {
-            new SqlParameter("@isAdmin", SessionHelper.GetSessionValue<bool>(_adminKey,out isadmin)),
+            new SqlParameter("@isAdmin", SessionHelper.GetSessionValue<bool>(_adminKey, isadmin)),
             new SqlParameter("@loginId",loginId )
         };
         DataSet dataSet = DataAccess.FillDataSet(sql, CommandType.StoredProcedure, sqlParameters);

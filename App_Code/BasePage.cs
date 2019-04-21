@@ -16,7 +16,7 @@ using System.Web.UI.WebControls;
 /// </summary>
 public class BasePage : Page
 {
-    protected string _loginId { get; private set; }
+    protected string _loginId { get; set; }
     const string _loginIdKey = "Login_Id";
 
     public static string connectionstring
@@ -50,6 +50,8 @@ public class BasePage : Page
     {
         if (!IsPostBack)
         {
+            // to be removed after testing
+            SessionHelper.AddtoSession<int>(_loginIdKey, 5017);
             try
             {
                 _loginId = SessionHelper.GetSessionValue<string>(_loginIdKey);

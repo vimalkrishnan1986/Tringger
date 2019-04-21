@@ -22,13 +22,11 @@ public static class SessionHelper
         return (T)TypeDescriptor.GetConverter(typeof(T))
             .ConvertFromInvariantString(sessionVal.ToString());
     }
-    public static T GetSessionValue<T>(String key, out T defaultValue)
+    public static T GetSessionValue<T>(String key, T defaultValue)
     {
         object sessionVal = HttpContext.Current.Session[key];
-        defaultValue = default(T);
         if (sessionVal == null)
         {
-
             return defaultValue;
         }
 

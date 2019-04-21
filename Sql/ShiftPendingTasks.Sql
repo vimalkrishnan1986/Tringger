@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE Shiftpendingtasks @loginId INT, 
+﻿CREATE PROCEDURE Shiftpendingtasks @loginId INT, 
                                   @date    DATETIME 
 AS 
   BEGIN 

@@ -15,15 +15,17 @@ using System.Data.SqlClient;
 public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 {
     const string _loginIdKey = "Login_Id";
-    const string _departmentKey = "IsInitialDepartment";
-
+    const string _isinitialDepartmentKey = "IsInitialDepartment";
+    const string _isFinalDepartmentKey = "IsFinalDepartment";
+    const string _unitIdKey = "Unit_Id";
+    protected string InputValue { get; set; }
 
     protected override void Page_Init(object sender, EventArgs e)
     {
 
         try
         {
-            SessionHelper.GetSessionValue<string>(_loginIdKey);
+            _loginId = SessionHelper.GetSessionValue<string>(_loginIdKey);
         }
         catch (KeyNotFoundException)
         {
@@ -41,28 +43,29 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         tdMessage.InnerHtml = "";
         if (!IsPostBack)
         {
+            ///
+            SessionHelper.AddtoSession<bool>("Admin", true);
+            SessionHelper.AddtoSession<string>("Company_Unit_Name", "");
+
+            ///
             DateFrom.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
             DateTo.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
             Staff_Master_Staff_Name();
-            ProjectIDLoad();
+            int responseType = GetQueryStringValue<int>("ResponseType");
+            List<int> applicableResponseTypes = new List<int> { 3, 2, -1, 5 };
 
-            if (Request.QueryString["ResponseType"] == "3" || Request.QueryString["ResponseType"] == "2" || Request.QueryString["ResponseType"] == "-1" || Request.QueryString["ResponseType"] == "5")
+            if (!applicableResponseTypes.Contains(responseType))
             {
-                //case "3":               
-                Load_Data1("");
-                this.InputValue = "0";
-                //break;
+                PageReload(responseType.ToString());
+                return;
             }
-            else
-            {
-                PageReload(Convert.ToString(Request.QueryString["ResponseType"]));
-            }
+            Load_Data1("");
+            this.InputValue = "0";
+
         }
     }
 
 
-
-    protected string InputValue { get; set; }
     protected void PageReload(string strType)
     {
 
@@ -256,14 +259,17 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     protected void ShiftPendingTasks()
     {
         const string query = "Shiftpendingtasks";
-        DataAccess.ExecuteNonQuery(query, CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@loginId", _loginId), new SqlParameter("@date", GetIstDate()) });
+        DataAccess.ExecuteNonQuery(query, CommandType.StoredProcedure, new SqlParameter[] {
+            new SqlParameter("@loginId", _loginId),
+            new SqlParameter("@date", GetIstDate())
+        });
     }
 
 
     protected void CheckForUnAssignedOrders()
     {
 
-        if (!SessionHelper.GetSessionValue<bool>(_departmentKey))
+        if (!SessionHelper.GetSessionValue<bool>(_isFinalDepartmentKey))
         {
             CheckForAllUnAssignedProcessOrders();
             return;
@@ -292,7 +298,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
     protected void CheckForUnAssignedDeliveries()
     {
-        if (!SessionHelper.GetSessionValue<bool>(_departmentKey))
+        if (!SessionHelper.GetSessionValue<bool>(_isinitialDepartmentKey))
         {
             CheckForAllUnAssignedProcessOrders();
             return;
@@ -634,11 +640,18 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     }
     protected void Load_Data1(string Query)
     {
-        if (Session["IsInitialDepartment"].ToString() != "" || Session["IsInitialDepartment"].ToString() != null)
+        bool isInitialDepartment = false;
+        bool isFinalDepartment = false;
+
+        isInitialDepartment = SessionHelper.GetSessionValue<bool>(_isinitialDepartmentKey, isInitialDepartment);
+        isFinalDepartment = SessionHelper.GetSessionValue<bool>(_isFinalDepartmentKey, isFinalDepartment);
+
+        if (isInitialDepartment)
         {
             CheckForUnAssignedOrders();
         }
-        if (Session["IsFinalDepartment"].ToString() != "" || Session["IsFinalDepartment"].ToString() != null)
+
+        if (isFinalDepartment)
         {
             CheckForUnAssignedDeliveries();
         }
@@ -861,7 +874,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                                  "</tr>";
                         }
                         //string ThisDate = Convert.ToDateTime(aryFullDate[intPrintLoop]).ToString("dd/MM/yyyy HH:mm:ss tt");
-                        string ThisDate = Convert.ToDateTime(aryFullDate[intPrintLoop]).ToString("MM/dd/yyyy");
+                        string ThisDate = Convert.ToDateTime(aryFullDate[intPrintLoop]).ToString();
                         aryLeaveApprove = Leave_Approve(strFullDate, strStaff_Id, ApproveRights, ThisDate, IsField);
 
                         if (Convert.ToString(aryLeaveApprove[0]).Trim() == "0")
@@ -1691,7 +1704,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                         aryApprove[intPrintLoop] = "<div style=\"float:left;\" class=\"label\">Time Line:</div><div style=\"float:right;\">" + aryApprove[intPrintLoop] + "</div>";
                     }
                 }
-                string ThisDate = Convert.ToDateTime(aryFullDate[intPrintLoop]).ToString("MM/dd/yyyy");
+                string ThisDate = Convert.ToDateTime(aryFullDate[intPrintLoop]).ToString();
                 aryLeaveApprove = Leave_Approve(strFullDate, strStaff_Id, ApproveRights, ThisDate, IsField);
                 if (Convert.ToString(aryLeaveApprove[0]).Trim() == "0")
                 {
@@ -1732,8 +1745,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
     protected string[] FnSignInSignOut(string strStaffId, string strDate, bool intNeed, bool intNeedRights)
     {
+
         string[] aryReturn = new string[] { "", "", "", "", "", "" };
-        string Qry = "SELECT Case When In_Time IS NOT NULL AND Out_Time IS NULL THEN CAST('23:59' AS TIME) ELSE Out_Time END As Out_DTime, * FROM Attendance_Master WHERE Staff_Name='" + strStaffId + "' AND Attendance_Date='" + strDate + "' and Entered_Unit= '" + Session["Unit_Id"].ToString() + "' ";
+        string Qry = "SELECT Case When In_Time IS NOT NULL AND Out_Time IS NULL THEN CAST('23:59' AS TIME) ELSE Out_Time END As Out_DTime, * FROM Attendance_Master WHERE Staff_Name='" + strStaffId + "' AND Attendance_Date='" + strDate + "' and Entered_Unit= '" + SessionHelper.GetSessionValue<string>(_unitIdKey, "0") + "' ";
 
         DataTable objTable = FillTable(Qry);
 
@@ -1918,24 +1932,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     {
         Staff_Name.SelectedValue = Session["Login_Id"].ToString();
         Load_Data1("");
-    }
-    protected void ProjectIDLoad()
-    {
-        try
-        {
-            string strQuery = "select distinct Project_Name,ProjectId from VW_TimeSheetAndTaskMaster where Unit_Id = '" + Session["Unit_Id"].ToString() + "' and ProjectId is not null group by Project_Name, ProjectId order by ProjectId desc";
-
-            BindDropDownList
-            (
-                strQuery,
-                ProjectDD
-            );
-
-        }
-        catch (Exception err)
-        {
-            WarningMessage("Error occurred in method of 'ProjectIdLoad' error details:" + Convert.ToString(err.Message), tdMessage);
-        }
     }
     protected void ImageMap1_Click(object sender, ImageClickEventArgs e)
     {

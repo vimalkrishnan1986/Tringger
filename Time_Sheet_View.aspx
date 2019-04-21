@@ -500,8 +500,9 @@
                     <!--<p class="h3">TEST</p>-->
 
                     <a style="background-color: transparent; font-size: small; color: #f0f0f0" class="btn btn-default btn-xs" href="../AllUsersOnAMapToday.aspx" target="_blank">View Map  <span class="glyphicon glyphicon-map-marker"></span></a>
+                    <asp:ObjectDataSource ID="ProjectDataSource" runat="server" TypeName="ObjectDataSet" SelectMethod="GetProjects" />
                     <div class="dropdown">
-                        <asp:DropDownList runat="server" DataTextField="Project_Name" DataValueField="ProjectId" CssClass="btn btn-default btn-sm" ID="ProjectDD" AppendDataBoundItems="true" name="ProjectDD" OnSelectedIndexChanged="ProjectDD_SelectedIndexChanged" AutoPostBack="true">
+                        <asp:DropDownList runat="server" DataTextField="Project_Name" DataValueField="ProjectId" CssClass="btn btn-default btn-sm" ID="ProjectDD" AppendDataBoundItems="true" name="ProjectDD" OnSelectedIndexChanged="ProjectDD_SelectedIndexChanged" DataSourceID="ProjectDataSource" AutoPostBack="true">
                             <asp:ListItem Value="" Text="---Order Id---"></asp:ListItem>
                         </asp:DropDownList>
                     </div>

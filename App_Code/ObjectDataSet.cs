@@ -41,9 +41,22 @@ public class ObjectDataSet
 
         string query = "Getstaff";
         return DataAccess.FillDataSet(query, CommandType.StoredProcedure, new SqlParameter[]{
-            new SqlParameter("@employeeId",SessionHelper.GetSessionValue<int>(loginKey)),
-            new SqlParameter("@isadmin",SessionHelper.GetSessionValue<bool>(adminKey)),
-            new SqlParameter("@unit_id",SessionHelper.GetSessionValue<string>(unitIdKey))
+            new SqlParameter("@employeeId",SessionHelper.GetSessionValue<int>(loginKey,1)),
+            new SqlParameter("@isadmin",SessionHelper.GetSessionValue<bool>(adminKey,false)),
+            new SqlParameter("@unit_id",SessionHelper.GetSessionValue<string>(unitIdKey,"0"))
         }).Tables[0];
     }
+
+    [DataObjectMethod(DataObjectMethodType.Select)]
+    public DataTable GetProjects()
+    {
+        const string unitIdKey = "unit_id";
+        string query = "Getprojects";
+        return DataAccess.FillDataSet(query, CommandType.StoredProcedure, new SqlParameter[]{
+             new SqlParameter("@unitid",SessionHelper.GetSessionValue<string>(unitIdKey,"0"))
+        }).Tables[0];
+    }
+
+
+
 }
