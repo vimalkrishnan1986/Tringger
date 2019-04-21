@@ -75,11 +75,7 @@ public class clsTask_Master : BasePage
 
    
 
-    public string FnGetDate(DateTime dateValue)
-    {
-        string[] aryMonth = new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-        return dateValue.Day + "-" + aryMonth[dateValue.Month - 1] + "-" + dateValue.Year;
-    }
+   
 
     protected virtual string FnDateDiffCondition(string StartDateField, string EndDateField, string StartDate, string EndDate, out DataTable objDuration)
     {

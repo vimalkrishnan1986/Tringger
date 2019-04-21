@@ -27,6 +27,14 @@ public class BasePage : Page
         }
     }
 
+    public static DateTime CurrentTime
+    {
+        get
+        {
+            return DateTime.UtcNow.AddHours(5).AddMinutes(30);
+        }
+
+    }
 
     protected T GetQueryStringValue<T>(String key)
     {
@@ -52,6 +60,13 @@ public class BasePage : Page
             }
         }
 
+    }
+
+
+    public string FormattedDate(DateTime dateValue)
+    {
+        string[] aryMonth = new string[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+        return dateValue.Day + "-" + aryMonth[dateValue.Month - 1] + "-" + dateValue.Year;
     }
 
     protected void BindGridView(string strQuery, GridView GridObject)

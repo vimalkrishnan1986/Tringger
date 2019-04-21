@@ -41,9 +41,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         tdMessage.InnerHtml = "";
         if (!IsPostBack)
         {
-            DateFrom.Text = FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30));// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
-            DateTo.Text = FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30));// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
-            compnay_dropDown.DataBind();
+            DateFrom.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
+            DateTo.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
             Staff_Master_Staff_Name();
             ProjectIDLoad();
 
@@ -62,19 +61,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     }
 
 
-    public DateTime GetDate2()
-    {
-        DateTime T = DateTime.UtcNow.AddHours(5).AddMinutes(30);
-        string TT = T.ToString("yyyy-MM-dd HH:mm:ss");
-        return Convert.ToDateTime(TT);
-    }
-    public string GetDate3()
-    {
-        DateTime T = DateTime.UtcNow.AddHours(5).AddMinutes(30);
-        //return T;
-        string TT = T.ToString("yyyy-MM-dd HH:mm:ss");
-        return (TT);
-    }
+
     protected string InputValue { get; set; }
     protected void PageReload(string strType)
     {
@@ -282,7 +269,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             return;
         }
 
-        int count = GetEnquiries(GetDate2(), 1, 5).Rows.Count;
+        int count = GetEnquiries(GetDateAsDatetime(), 1, 5).Rows.Count;
         UnAssignedDiv.Visible = count > 0;
         if (UnAssignedDiv.Visible)
         {
@@ -293,7 +280,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     protected void CheckForAllUnAssignedProcessOrders()
     {
 
-        int count = GetEnquiries(GetDate2(), 3, 5).Rows.Count;
+        int count = GetEnquiries(GetDateAsDatetime(), 3, 5).Rows.Count;
         UnAssignedProcessDiv.Visible = count > 0;
 
         if (UnAssignedProcessDiv.Visible)
@@ -315,14 +302,14 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         //Response.Write(Session["IsFinalDepartment"].ToString() + " Is available<br />");
 
         string ThisStaff = "";
-        string This = "select * from Enquiries where Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode=2 and Status !=5 ";
+        string This = "select * from Enquiries where Cast (Time as date) <= Cast ('" + GetDateAsDatetime() + "' as date) and BMode=2 and Status !=5 ";
 
 
         DataTable objTable1 = FillTable(This);
 
         if (objTable1.Rows.Count > 0)
         {
-            string This2 = "select t1.*, t2.PostCode, t3.Band, t2.Latitude, t2.Longitude from Enquiries t1 join tblLeadMaster t2 on t1.LeadId = t2.Lead_Id join PincodeBandAllocate t3 on t2.Pincode = (Select pincode from pincodes where pinid = t3.PinId and Entered_Unit ='" + Session["Unit_Id"].ToString() + "') where Cast (t1.Time as date) <= Cast ('" + GetDate2() + "' as date) and t1.BMode=2 and t1.Status !=5 ";
+            string This2 = "select t1.*, t2.PostCode, t3.Band, t2.Latitude, t2.Longitude from Enquiries t1 join tblLeadMaster t2 on t1.LeadId = t2.Lead_Id join PincodeBandAllocate t3 on t2.Pincode = (Select pincode from pincodes where pinid = t3.PinId and Entered_Unit ='" + Session["Unit_Id"].ToString() + "') where Cast (t1.Time as date) <= Cast ('" + GetDateAsDatetime() + "' as date) and t1.BMode=2 and t1.Status !=5 ";
 
             //Response.Write(This2); Response.End();
             DataTable objTable = FillTable(This2);
@@ -360,13 +347,13 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
                     if (RejectedStaff != "0")
                     {
-                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "' and t1.FirstStaff_Id != '" + RejectedStaff + "'";
+                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDateAsDatetime() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "' and t1.FirstStaff_Id != '" + RejectedStaff + "'";
 
 
                     }
                     else
                     {
-                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
+                        QueryWithAttendance55 = "select top 1 t1.FirstStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.FirstStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDateAsDatetime() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
 
 
                     }
@@ -402,11 +389,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                             {
                                 if (RejectedStaff != "0")
                                 {
-                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'  and t1.SecStaff_Id != '" + RejectedStaff + "'";
+                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDateAsDatetime() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'  and t1.SecStaff_Id != '" + RejectedStaff + "'";
                                 }
                                 else
                                 {
-                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDate2() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
+                                    QueryWithAttendance66 = "select top 1 t1.SecStaff_Id from PostCodeToDriver t1 join Attendance_Master t4 on t1.SecStaff_Id=t4.Staff_Name where Cast(t4.Attendance_Date as date) = cast('" + GetDateAsDatetime() + "' as date) and t4.In_Time is not null and t4.Out_Time is null and t1.PostCode='" + PostCode + "'";
                                 }
 
                                 DataTable objDataTableStatus663 = FillTable(QueryWithAttendance66);
@@ -521,7 +508,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     protected void DistributeOrders_Click(object sender, EventArgs e)
     {
         //string This = "select * from Enquiries where  (Cast (Time as date) = Cast ('" + GetDate2() + "' as date) or  Cast (Time as date) < Cast ('" + GetDate2() + "' as date) )and BMode= 1 ";
-        string This = "select * from Enquiries where  Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode= 1 ";
+        string This = "select * from Enquiries where  Cast (Time as date) <= Cast ('" + GetDateAsDatetime() + "' as date) and BMode= 1 ";
         DataTable objTable = FillTable(This);
         if (objTable.Rows.Count > 0)
         {
@@ -558,7 +545,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     }
     protected void DistributeAllProcessOrders_Click(object sender, EventArgs e)
     {
-        string This = "select t1.*, t2.Department from Enquiries t1 left outer join tblFieldMoreStatusMaster t2 on t1.Sub_Status = t2.FieldMore_Status_Id where  Cast (Time as date) <= Cast ('" + GetDate2() + "' as date) and BMode= 3 and t1.Status !=5  ";
+        string This = "select t1.*, t2.Department from Enquiries t1 left outer join tblFieldMoreStatusMaster t2 on t1.Sub_Status = t2.FieldMore_Status_Id where  Cast (Time as date) <= Cast ('" + GetDateAsDatetime() + "' as date) and BMode= 3 and t1.Status !=5  ";
 
         DataTable objTable = FillTable(This);
         if (objTable.Rows.Count > 0)
@@ -677,7 +664,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         string IsField = "0";
         string strEmpId = Convert.ToString(Session["Login_Id"]);
         string strWhere = " SELECT * from TimeSheetViewAllDates";
-        Session["Company_Unit_Name"] = compnay_dropDown.SelectedValue;
+        Session["Company_Unit_Name"] = Company_Unit_Name.SelectedValue;
         Session["Staff_Id"] = Staff_Name.SelectedValue;
         strStaff_Id = Staff_Name.SelectedValue;
         Session["DateFrom"] = strSD;
@@ -705,7 +692,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             }
         }
 
-        if (Convert.ToString(compnay_dropDown.SelectedValue) != "")
+        if (Convert.ToString(Company_Unit_Name.SelectedValue) != "")
         {
             strWhere += ((intCheck == 1) ? " AND " : " Where ") + " Company_Unit_Name='" + Convert.ToString(Company_Unit_Name.SelectedItem.Text) + "'";
             strWhere += ((intCheck == 1) ? " AND " : " Where ") + " Task_Date BETWEEN '" + strSD + "'  AND '" + strED + "' ";
@@ -759,7 +746,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             aryLodData[intFillLoop] = "";
             aryApprovecheck[intFillLoop] = "0";
         }
-        DateTime ThisDay = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date;
+        DateTime ThisDay = CurrentTime.Date;
         string strRowProperty = "";
         string strBorder = "";
 
@@ -825,11 +812,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                 {
                     for (int intPrintLoop = 0; intPrintLoop < aryLodData.Length; intPrintLoop++)
                     {
-                        string ThisDate2 = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date.ToString("MM/dd/yyyy");
+                        string ThisDate2 = CurrentTime.Date.ToString("MM/dd/yyyy");
                         string[] arySignInSignOut;
-                        string strFullDate = Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
+                        string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
 
-                        if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                        if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                         {
                             strEmptyCell = "";
                             arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights);
@@ -838,7 +825,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                         {
                             arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights);
                         }
-                        if (strFullDate == Convert.ToString(FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                        if (strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                         {
                             strRowProperty = "style=\"background-color:#c0c0c0; border-radius:10px;\"";
                             BeforeTime = "<span style=\"  width:100%;\"> :" + objRow["Start_Time"].ToString() + "</span>";
@@ -854,7 +841,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                         string strToolTipText22 = "Click this button to plan and schedule various tasks or reminders.";
                         string tooltip22 = " onMouseover=\"ddrivetip('" + strToolTipText22 + "')\" onmouseout=\"hideddrivetip()\"";
                         strEmptyCell = "<div style=\"text-align:center;\">" +
-                                                 "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip22 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
+                                                 "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip22 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
                         if (aryLodData[intPrintLoop] != "")
                         {
                             if (aryApprove[intPrintLoop] == "" && Convert.ToInt32(aryApprovecheck[intPrintLoop]) > 0 && ApproveRights)
@@ -925,7 +912,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                         DateTime ThisDt = Convert.ToDateTime(objRow["Time_Sheet_Date"].ToString() + " " + objRow["Start_Time"].ToString());
                         string ThisDTSt = ThisDt.ToString("M/d/yyyy h:mm tt");
                         string ThisDTSt2 = ThisDt.ToString("h:mm tt");
-                        if (Convert.ToDateTime(objRow["Time_Sheet_Date"]).ToShortDateString() == Convert.ToDateTime(GetDate2()).ToShortDateString())
+                        if (Convert.ToDateTime(objRow["Time_Sheet_Date"]).ToShortDateString() == Convert.ToDateTime(GetDateAsDatetime()).ToShortDateString())
                         {
                             BeforeTime = "<span style=\" background-color:#f5d2b9; width:100%;\">by :" + ThisDTSt2 + "</span>";
                         }
@@ -944,9 +931,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                         }
                         else
                         {
-                            ThatStart = GetDate2();
+                            ThatStart = GetDateAsDatetime();
                         }
-                        DateTime ThisNow = GetDate2();
+                        DateTime ThisNow = GetDateAsDatetime();
                         DateTime Then = ThisNow.AddMinutes(-30.00);
                         if (Convert.ToString(objRow["End_Time"]) != "" && Convert.ToString(objRow["Start_Time"]) != "")
                         {
@@ -1018,7 +1005,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                                     aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul class=\"dropdown-menu dropdown-menu-right\" style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UOVD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Reject' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
                                     //open/done buttons - end                                       
                                     //dropdown content(more) when clicking big button - start
-                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDate2() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
+                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDateAsDatetime() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                     "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
                     "&task_id=" + Convert.ToString(objRow["task_name"]) +
                     "&status_id=" + Convert.ToString(objRow["Status_Id"]) +
@@ -1160,7 +1147,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                                         aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\" class=\"dropdown-menu dropdown-menu-right\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=2&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&PostCode=" + Convert.ToString(objRow["PostCode"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Primary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li><li><a style=\"background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=3&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Secondary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
                                         //open/done buttons - end                                       
                                         //dropdown content(more) when clicking big button - start
-                                        aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDate2() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p>";
+                                        aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDateAsDatetime() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p>";
                                         aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                         "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
                         "&task_id=" + Convert.ToString(objRow["task_name"]) +
@@ -1215,7 +1202,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                                                 //open/done buttons - end
                                                 aryLodData[intLoop] += "</div></center>";
                                                 //dropdown content(more) when clicking big button - start
-                                                aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDate2() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
+                                                aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDateAsDatetime() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                 "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&task_id=" + Convert.ToString(objRow["task_name"]) + "&status_id=" + Convert.ToString(objRow["Status_Id"]) + "&id=&Action=NN\" onclick=\"return hs.htmlExpand(this, { objectType: 'iframe' } )\" >" + "<input type ='button' class=\"btn btn-default btn-sm\" value='Edit / Add Details' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/></a></div></center>";
                                             }
                                             else
@@ -1672,27 +1659,27 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                 string strToolTipText2 = "Click this button to plan and schedule various tasks or reminders.";
                 string tooltip2 = " onMouseover=\"ddrivetip('" + strToolTipText2 + "')\" onmouseout=\"hideddrivetip()\"";
                 string[] arySignInSignOut;
-                string strFullDate = Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
-                if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
+                if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                 {
                     strEmptyCell = "";
                     arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights);
                     if (aryCheck[intPrintLoop])
                     {
                         strEmptyCell = "<tr><td style=\"text-align:center;\"><div style=\"text-align:center;\">" +
-                           "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
+                           "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
                     }
                 }
                 else
                 {
                     arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights);
                 }
-                if (Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) == Convert.ToString(FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                if (Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                 {
                     strRowProperty = "style=\"background-color:#c0c0c0; border-radius:10px;\"";
                 }
                 strHTML += "";
-                strEmptyCell = "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; text-align:center; background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FnGetDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
+                strEmptyCell = "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; text-align:center; background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
                 if (aryLodData[intPrintLoop] != "")
                 {
                     if (aryApprove[intPrintLoop] == "" && Convert.ToInt32(aryApprovecheck[intPrintLoop]) > 0 && ApproveRights)
@@ -1801,7 +1788,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
                 aryReturn[5] = "<spanwrap class=\"spanwrap\" >Out @-" + input2 + "</spanwrap>";
             }
 
-            if (Convert.ToDateTime(strDate) < Convert.ToDateTime(FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+            if (Convert.ToDateTime(strDate) < Convert.ToDateTime(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
             {
                 aryReturn[1] = OutDTime;
             }
@@ -1894,33 +1881,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
             WarningMessage("Error occurred in Constructor of 'Time_Sheet_Master_ExcelDownload' error details:" + Convert.ToString(err.Message), tdMessage);
         }
     }
+
     protected void Staff_Master_Staff_Name()
     {
-        try
-        {
-            string strEmpId = Convert.ToString(Session["Login_Id"]);
-            string strQuery = "SELECT [Staff_Id], [Staff_Name], CAST( CASE '" + Convert.ToString(strEmpId) + "' WHEN Staff_Id THEN 1 ELSE 0 END " +
-                               " as bit) As Checked  FROM VW_Active_Staff_Master ";
+        Staff_Name.SelectedValue = (Convert.ToString(Session["Staff_Id"]) == "") ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
 
-            if (!Convert.ToBoolean(Session["Admin"]))
-            {
-                strQuery = " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name]  , Cast(1 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
-                            " UNION " +
-                            " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name] ,  Cast(0 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN(SELECT ISNULL(Reporting_Staff,0) FROM Reporting_Master WHERE Responsible_Staff IN('" + Convert.ToString(strEmpId) + "') )";
-            }
-
-            BindDropDownList
-            (
-                strQuery,
-                Staff_Name
-            );
-
-            Staff_Name.SelectedValue = (Convert.ToString(Session["Staff_Id"]) == "") ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
-        }
-        catch (Exception err)
-        {
-            WarningMessage("Error occurred in method of 'Staff_Master_Staff_Name' error details:" + Convert.ToString(err.Message), tdMessage);
-        }
     }
     protected void Button2_Click(object sender, EventArgs e)
     {
@@ -1943,9 +1908,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     protected void Button4_Click(object sender, EventArgs e)
     {
 
-        DateTime DateTo1 = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date;
+        DateTime DateTo1 = CurrentTime.Date;
         DateTo.Text = DateTo1.ToString("dd-MMM-yyyy");
-        DateTime DateFrom1 = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date;
+        DateTime DateFrom1 = CurrentTime.Date;
         DateFrom.Text = DateFrom1.ToString("dd-MMM-yyyy");
         Load_Data1("");
     }
@@ -1959,7 +1924,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         try
         {
             string strQuery = "select distinct Project_Name,ProjectId from VW_TimeSheetAndTaskMaster where Unit_Id = '" + Session["Unit_Id"].ToString() + "' and ProjectId is not null group by Project_Name, ProjectId order by ProjectId desc";
-
 
             BindDropDownList
             (
@@ -2069,32 +2033,32 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     }
     protected void ReplanBtn_Click(object sender, EventArgs e)
     {
-        string Query = " and Time_Sheet_Master.Replan = 'r' and Time_Sheet_Master.End_Date > CONVERT(date, '" + GetDate2() + "')";
+        string Query = " and Time_Sheet_Master.Replan = 'r' and Time_Sheet_Master.End_Date > CONVERT(date, '" + GetDateAsDatetime() + "')";
         Load_Data1(Query);
     }
     protected void ImageButton3_Click(object sender, ImageClickEventArgs e)
     {
-        string Query = " and Time_Sheet_Master.Replan = 'r' and Time_Sheet_Master.End_Date > CONVERT(date, '" + GetDate2() + "')";
+        string Query = " and Time_Sheet_Master.Replan = 'r' and Time_Sheet_Master.End_Date > CONVERT(date, '" + GetDateAsDatetime() + "')";
         Load_Data1(Query);
     }
     protected void WarningBtn_Click(object sender, EventArgs e)
     {
-        string Query = " and DATEADD(minute,30, CAST(Time_Sheet_Master.Start_Time AS TIME)) < CONVERT(VARCHAR(8),'" + GetDate2() + "',108) and Status_Id = 1";
+        string Query = " and DATEADD(minute,30, CAST(Time_Sheet_Master.Start_Time AS TIME)) < CONVERT(VARCHAR(8),'" + GetDateAsDatetime() + "',108) and Status_Id = 1";
         Load_Data1(Query);
     }
     protected void ImageButton4_Click(object sender, ImageClickEventArgs e)
     {
-        string Query = " and DATEADD(minute,30, CAST(Time_Sheet_Master.Start_Time AS TIME)) < CONVERT(VARCHAR(8),'" + GetDate2() + "',108) and Time_Sheet_Master.Status = 1";
+        string Query = " and DATEADD(minute,30, CAST(Time_Sheet_Master.Start_Time AS TIME)) < CONVERT(VARCHAR(8),'" + GetDateAsDatetime() + "',108) and Time_Sheet_Master.Status = 1";
         Load_Data1(Query);
     }
     protected void DelayedBtn_Click(object sender, EventArgs e)
     {
-        string Query = " and Time_Sheet_Master.End_Date < CONVERT(date, '" + GetDate2() + "') and Time_Sheet_Master.Status != 3";
+        string Query = " and Time_Sheet_Master.End_Date < CONVERT(date, '" + GetDateAsDatetime() + "') and Time_Sheet_Master.Status != 3";
         Load_Data1(Query);
     }
     protected void ImageButton5_Click(object sender, ImageClickEventArgs e)
     {
-        string Query = " and Time_Sheet_Master.End_Date < CONVERT(date, '" + GetDate2() + "') and Time_Sheet_Master.Status != 3";
+        string Query = " and Time_Sheet_Master.End_Date < CONVERT(date, '" + GetDateAsDatetime() + "') and Time_Sheet_Master.Status != 3";
         Load_Data1(Query);
     }
     protected void ProjectDD_SelectedIndexChanged(object sender, EventArgs e)
@@ -2113,7 +2077,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
         string Query = " and Project_Master.Project_Name ='" + ProjectDD.SelectedValue + "'";
         Load_Data1(Query);
-        DateFrom.Text = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date.ToString("dd-MMM-yyyy");
+        DateFrom.Text = CurrentTime.Date.ToString("dd-MMM-yyyy");
     }
     protected void UnpickedBtn_Click(object sender, EventArgs e)
     {
@@ -2123,7 +2087,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
     }
     protected void AcceptAllUnpickedOrdersBtn_Click(object sender, EventArgs e)
     {
-        Response.Redirect("Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UPVV&Date=" + GetDate2() + "&Time_Sheet_Id=&StatusID=&Location=&task_Id=&Staff_Id=" + Staff_Name.SelectedItem.Value + "");
+        Response.Redirect("Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UPVV&Date=" + GetDateAsDatetime() + "&Time_Sheet_Id=&StatusID=&Location=&task_Id=&Staff_Id=" + Staff_Name.SelectedItem.Value + "");
     }
     protected void AllOrders_Click(object sender, EventArgs e)
     {
@@ -2156,12 +2120,12 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         //string url = "Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=A&Vis=" + InputTxt.Text + "";
         //Response.Write("<script language=\"javascript\">window.open('" + url + "','SportZip',toolbar='-1,scrollbars=-1,resizable=-1');void(0);</script>");
         //Page.ClientScript.RegisterStartupScript(this.GetType(), "RedirectScript", "window.parent.location='" + url + "'", true);
-        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=A&Vis=" + InputTxt.Text + "");
+        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDateAsDatetime() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=A&Vis=" + InputTxt.Text + "");
     }
 
     protected void bt2_Click(object sender, EventArgs e)
     {
-        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=11&Vis=" + InputTxt.Text + "");
+        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDateAsDatetime() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=11&Vis=" + InputTxt.Text + "");
     }
 
     protected void bt3_Click(object sender, EventArgs e)
@@ -2169,11 +2133,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         //ClientScriptManager.RegisterClientScriptBlock(this.GetType(),
         //    "RedirectScript", "window.parent.location = 'Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=10&Vis=" + InputTxt.Text + "", true);
 
-        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=10&Vis=" + InputTxt.Text + "");
+        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDateAsDatetime() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=10&Vis=" + InputTxt.Text + "");
     }
     protected void Button8_Click(object sender, EventArgs e)
     {
-        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDate2() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=13&Location=" + LastLocation.Value + "&Vis=" + InputTxt.Text + "");
+        Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDateAsDatetime() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=13&Location=" + LastLocation.Value + "&Vis=" + InputTxt.Text + "");
     }
 
     //protected void AttendanceInBtn_Click(object sender, EventArgs e)
@@ -2184,22 +2148,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
 
     #region static methods
 
-    [DataObjectMethod(DataObjectMethodType.Select)]
-    public static DataTable GetCompany()
-    {
-        const string adminKey = "Admin";
-        const string companyKey = "Company_Unit_Name";
-
-        string query = "select [Unit_Id], [Company_Unit_Name] from Company_Unit_Master";
-
-        if (!SessionHelper.GetSessionValue<bool>(adminKey))
-        {
-            query += "where unit_id=" + SessionHelper.GetSessionValue<string>("unit_id");
-        }
-
-        query += "And Company_Unit_Name='" + SessionHelper.GetSessionValue<string>(companyKey) + "'";
-        return FillTable(query);
-    }
 
     private static DataTable GetEnquiries(DateTime dateTime, int bmode, int excemptedStatus)
     {
@@ -2207,6 +2155,17 @@ public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
         return DataAccess.FillDataSet(query, CommandType.StoredProcedure, new SqlParameter[] { new SqlParameter("@date", dateTime),
             new SqlParameter("@bMode", bmode),
             new SqlParameter("@excepmtedStatus", excemptedStatus) }).Tables[0];
+    }
+
+    private static DateTime GetDateAsDatetime()
+    {
+        return Convert.ToDateTime(CurrentTime.ToString("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    private static string GetDateAsString()
+    {
+        return CurrentTime.ToString("yyyy-MM-dd HH:mm:ss");
+
     }
     #endregion
 }

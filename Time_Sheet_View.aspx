@@ -506,7 +506,10 @@
                         </asp:DropDownList>
                     </div>
                     <div class="dropdown">
-                        <asp:DropDownList runat="server" ID="Staff_Name" Name="Staff_Name" DataTextField="Staff_Name" DataValueField="Staff_Id" CssClass="btn btn-default btn-sm" AppendDataBoundItems="true">
+
+                        <asp:ObjectDataSource ID="StaffDataSource" TypeName="ObjectDataSet" runat="server"
+                            SelectMethod="GetStaffs" />
+                        <asp:DropDownList runat="server" ID="Staff_Name" Name="Staff_Name" DataTextField="Staff_Name" DataValueField="Staff_Id" CssClass="btn btn-default btn-sm" DataSourceID="StaffDataSource" AppendDataBoundItems="true">
                             <asp:ListItem Text="--- Staff Name---" Value=""></asp:ListItem>
                         </asp:DropDownList>
                     </div>
@@ -840,8 +843,8 @@
 
                 <div class="overview" style="width: 100%; max-width: 100%; min-width: 100%; text-align: center;">
                     <asp:HiddenField ID="PickUpHdn" runat="server" Value="0" />
-                    <asp:ObjectDataSource ID="CompanyDataSource" runat="server" SelectMethod="GetCompany" />
-                    <telerik:RadComboBox ID="compnay_dropDown" runat="server" DataTextField="Company_Unit_Name" DataSourceID="CompanyDataSource" DataValueField="Unit_Id"></telerik:RadComboBox>
+                    <asp:ObjectDataSource ID="CompanyDataSource" runat="server" SelectMethod="GetCompany" TypeName="ObjectDataSet" />
+                    <telerik:RadComboBox ID="Company_Unit_Name" runat="server" DataTextField="Company_Unit_Name" DataSourceID="CompanyDataSource" DataValueField="Unit_Id"></telerik:RadComboBox>
                     <asp:LinkButton Visible="false" runat="server" ID="Excel" OnClick="Time_Sheet_Master_ExcelDownload" Enabled="false" Text="Excel Sheet" />
                 </div>
 

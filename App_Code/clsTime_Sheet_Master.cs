@@ -12,12 +12,9 @@ public class clsTime_Sheet_Master : BasePage
 {
     public DateTime GetIstDate()
     {
-        DateTime T = DateTime.UtcNow.AddHours(5).AddMinutes(30);
-        string TT = T.ToString("yyyy-MM-dd HH:mm:ss");
+        string TT = CurrentTime.ToString("yyyy-MM-dd HH:mm:ss");
         return Convert.ToDateTime(TT);
     }
-
-
 
 
     public void Department_Master_Department_Name(DropDownList Department_Name, HtmlTableCell tdMessage, string strValue)
