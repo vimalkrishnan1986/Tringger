@@ -12,7 +12,7 @@ using System.Xml.XPath;
 using System.Xml.Linq;
 using System.ComponentModel;
 using System.Data.SqlClient;
-public partial class Time_Sheet_Master_Time_Sheet_View : clsTime_Sheet_Master
+public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 {
     const string _loginIdKey = "Login_Id";
     const string _isinitialDepartmentKey = "IsInitialDepartment";
