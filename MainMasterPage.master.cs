@@ -23,9 +23,8 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
 
     protected void FnMenu()
     {
-        //needs to be altered
-
-        string sql = "GetMenu";
+        const string sql = "GetMenu";
+        const string relationName = "MenuSubmenuRelation";
         bool isadmin = false;
         int loginId = 0;
         loginId = SessionHelper.GetSessionValue<int>(_loginKey, loginId);
@@ -40,14 +39,17 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
             return;
         }
         string strMenu = "";
-        DataRelation dataRelation = new DataRelation("ModuleRelation", dataSet.Tables[0].Columns["module_id"],
-       dataSet.Tables[1].Columns["module_name"]);
-        dataSet.Relations.Add(dataRelation);
+        dataSet.Relations.Add(new DataRelation(relationName,
+          dataSet.Tables[0].Columns["module_id"],
+         dataSet.Tables[1].Columns["module_name"]
+         )
+         );
+
         foreach (DataRow parrentRow in dataSet.Tables[0].Rows)
         {
             strMenu = strMenu + "<div class=\"btn-group dropdown\" > <button style =\"width: 150px; background-color:white; margin-right:5px; margin-bottom:5px; font-size:small; border-radius:5px; " + "type=\"button\" class=\"btn btn-danger \" data-toggle=\"dropdown\">" + parrentRow["Module_Name"].ToString() + "<span class=\"caret\"></span></button><ul style=\"background-color:#eff0f2; margin-top:5px; padding:10px; border-width:0px;; font-size:small; text-align:left;\" class=\"dropdown-menu\" >";
 
-            foreach (DataRow childRow in parrentRow.GetChildRows("ModuleRelation"))
+            foreach (DataRow childRow in parrentRow.GetChildRows(relationName))
             {
                 strMenu += "<li><a href =\".." + "/" + childRow["File_Name"].ToString() + "\" class=\"btn btn-default\" style=\"background-color:white; color:#7c7e82; padding:0px; margin-top:0px; margin-bottom:5px; font-size:small; text-align:left;\">" + childRow["Sub_Module_Name"].ToString() + "</a></li>";
 
