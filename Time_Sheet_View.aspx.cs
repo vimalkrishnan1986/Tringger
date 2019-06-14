@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.Data.SqlClient;
 public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 {
+    static clsTime_Sheet_Master objclsTime_Sheet_Master;
     const string _loginIdKey = "Login_Id";
     const string _isinitialDepartmentKey = "IsInitialDepartment";
     const string _isFinalDepartmentKey = "IsFinalDepartment";
@@ -22,7 +23,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected override void Page_Init(object sender, EventArgs e)
     {
-
         try
         {
             _loginId = SessionHelper.GetSessionValue<string>(_loginIdKey);
@@ -42,15 +42,17 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
         tdMessage.InnerHtml = "";
         if (!IsPostBack)
-        {
-            ///
-            SessionHelper.AddtoSession<bool>("Admin", true);
-            SessionHelper.AddtoSession<string>("Company_Unit_Name", "");
-
-            ///
+        {    
+            if (Session["IsAlreadyLoad"] == null)
+            {
+                ShiftPendingTasks();
+                Session["IsAlreadyLoad"] = true;
+            }
             DateFrom.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
             DateTo.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
-            Staff_Master_Staff_Name();
+           
+           Staff_Master_Staff_Name();
+           
             int responseType = GetQueryStringValue<int>("ResponseType");
             List<int> applicableResponseTypes = new List<int> { 3, 2, -1, 5 };
 
@@ -61,10 +63,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             }
             Load_Data1("");
             this.InputValue = "0";
-
         }
     }
-
 
     protected void PageReload(string strType)
     {
@@ -268,8 +268,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void CheckForUnAssignedOrders()
     {
-
-        if (!SessionHelper.GetSessionValue<bool>(_isFinalDepartmentKey))
+        if (SessionHelper.GetSessionValue<Int16>(_isFinalDepartmentKey)!=1)
         {
             CheckForAllUnAssignedProcessOrders();
             return;
@@ -285,7 +284,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void CheckForAllUnAssignedProcessOrders()
     {
-
         int count = GetEnquiries(GetDateAsDatetime(), 3, 5).Rows.Count;
         UnAssignedProcessDiv.Visible = count > 0;
 
@@ -294,11 +292,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             UnAssignedProcessCount.Text = count.ToString();
         }
     }
-
-
     protected void CheckForUnAssignedDeliveries()
     {
-        if (!SessionHelper.GetSessionValue<bool>(_isinitialDepartmentKey))
+        if (!SessionHelper.GetSessionValue<bool>(_isinitialDepartmentKey, false))
         {
             CheckForAllUnAssignedProcessOrders();
             return;
@@ -640,18 +636,18 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
     }
     protected void Load_Data1(string Query)
     {
-        bool isInitialDepartment = false;
-        bool isFinalDepartment = false;
+        Int16 isInitialDepartment = 0;
+        Int16 isFinalDepartment = 0;
 
-        isInitialDepartment = SessionHelper.GetSessionValue<bool>(_isinitialDepartmentKey, isInitialDepartment);
-        isFinalDepartment = SessionHelper.GetSessionValue<bool>(_isFinalDepartmentKey, isFinalDepartment);
+        isInitialDepartment = SessionHelper.GetSessionValue<Int16>(_isinitialDepartmentKey, isInitialDepartment);
+        isFinalDepartment = SessionHelper.GetSessionValue<Int16>(_isFinalDepartmentKey, isFinalDepartment);
 
-        if (isInitialDepartment)
+        if (isInitialDepartment==1)
         {
             CheckForUnAssignedOrders();
         }
 
-        if (isFinalDepartment)
+        if (isFinalDepartment==1)
         {
             CheckForUnAssignedDeliveries();
         }
@@ -692,7 +688,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         {
             if (Convert.ToString(Staff_Name.SelectedValue) != "")
             {
-                ShiftPendingTasks();
+                //ShiftPendingTasks();
                 strWhere += " WHERE Staff_Id IN (" + Convert.ToString(Staff_Name.SelectedValue) + ")";
                 intCheck = 1;
             }
@@ -716,6 +712,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         }
         //Response.Write(strWhere + " ORDER BY Staff_Name Asc, Task_Date DESC, Start_Time Asc");
         //Response.End();
+
+        // performance opitmization needed over here
         DataTable objTable = FillTable(strWhere + " ORDER BY Staff_Name Asc, Task_Date DESC, Start_Time Asc");
 
         if (objTable.Rows.Count <= 0)
@@ -1898,7 +1896,51 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void Staff_Master_Staff_Name()
     {
-        Staff_Name.SelectedValue = (Convert.ToString(Session["Staff_Id"]) == "") ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
+
+        //string StaffID = string.IsNullOrWhiteSpace(SessionHelper.GetSessionValue<string>("Staff_Id", string.Empty)) ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
+
+        //try
+        //{
+        //    Staff_Name.SelectedValue = StaffID;
+        //}
+        //catch (Exception ex)
+        //{
+
+        //}
+        try
+        {
+            string strEmpId = Convert.ToString(Session["Login_Id"]);
+            string strQuery = "SELECT [Staff_Id], [Staff_Name], CAST( CASE '" + Convert.ToString(strEmpId) + "' WHEN Staff_Id THEN 1 ELSE 0 END " +
+                               " as bit) As Checked  FROM VW_Active_Staff_Master ";
+
+            //if (!Convert.ToBoolean(Session["Admin"]))
+            //{
+                strQuery = " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name]  , Cast(1 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
+                            " UNION " +
+                            " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name] ,  Cast(0 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN(SELECT ISNULL(Reporting_Staff,0) FROM Reporting_Master WHERE Responsible_Staff IN('" + Convert.ToString(strEmpId) + "') )";
+            //}
+            //else
+            //{
+            //    strQuery = " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name]  , Cast(1 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Session["Login_Id"].ToString() + "')";
+            //}
+            //    DataTable objTable1 = FillTable(strQuery);
+            //    Staff_Name.DataSource = objTable1;
+            //    Staff_Name.DataBind();
+            //    Staff_Name.DataValueField = "Staff_Id";
+            //    Staff_Name.DataTextField = "Staff_Name";
+            objclsTime_Sheet_Master.BindDropDownList
+            (
+                strQuery,
+                Staff_Name
+            );
+
+            Staff_Name.SelectedValue = (Convert.ToString(Session["Staff_Id"]) == "") ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
+        }
+        catch (Exception err)
+        {
+            //objclsTime_Sheet_Master.WarningMessage("Error occurred in method of 'Staff_Master_Staff_Name' error details:" + Convert.ToString(err.Message), tdMessage);
+        }
+
 
     }
     protected void Button2_Click(object sender, EventArgs e)

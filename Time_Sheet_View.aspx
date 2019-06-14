@@ -845,7 +845,7 @@
                 <div class="overview" style="width: 100%; max-width: 100%; min-width: 100%; text-align: center;">
                     <asp:HiddenField ID="PickUpHdn" runat="server" Value="0" />
                     <asp:ObjectDataSource ID="CompanyDataSource" runat="server" SelectMethod="GetCompany" TypeName="ObjectDataSet" />
-                    <telerik:RadComboBox ID="Company_Unit_Name" runat="server" DataTextField="Company_Unit_Name" DataSourceID="CompanyDataSource" DataValueField="Unit_Id"></telerik:RadComboBox>
+                    <telerik:RadComboBox ID="Company_Unit_Name" runat="server" DataTextField="Company_Unit_Name" DataSourceID="CompanyDataSource" Visible="false" DataValueField="Unit_Id"></telerik:RadComboBox>
                     <asp:LinkButton Visible="false" runat="server" ID="Excel" OnClick="Time_Sheet_Master_ExcelDownload" Enabled="false" Text="Excel Sheet" />
                 </div>
 
