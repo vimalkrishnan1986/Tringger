@@ -12,6 +12,8 @@ using System.Xml.XPath;
 using System.Xml.Linq;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Web.Services;
+
 public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 {
     static clsTime_Sheet_Master objclsTime_Sheet_Master;
@@ -64,6 +66,13 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             Load_Data1("");
             this.InputValue = "0";
         }
+    }
+
+    [WebMethod]
+    public static void SetTimeZone(string timeZone)
+    {
+        SessionHelper.AddtoSession("TimeZone", timeZone);
+        // capture the user timezone information
     }
 
     protected void PageReload(string strType)

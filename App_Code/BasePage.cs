@@ -51,7 +51,7 @@ public class BasePage : Page
         if (!IsPostBack)
         {
             // to be removed after testing
-          //  SessionHelper.AddtoSession<int>(_loginIdKey, 8027);
+            //  SessionHelper.AddtoSession<int>(_loginIdKey, 8027);
             try
             {
                 _loginId = SessionHelper.GetSessionValue<string>(_loginIdKey);
@@ -186,7 +186,7 @@ public class BasePage : Page
             using (SqlCommand cmd = new SqlCommand(strQuery, con)
             {
                 CommandType = commandType,
-                CommandTimeout=900
+                CommandTimeout = 900
             })
             {
 

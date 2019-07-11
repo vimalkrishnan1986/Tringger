@@ -32,7 +32,7 @@
     <script language="javascript" type="text/javascript" src="../Script/ToolTip/Tooltip.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-
+            SetTimeZone();
             $("a.quotepopup").fancybox(
                 {
                     'type': 'iframe',
@@ -42,6 +42,22 @@
                 }
             );
         });
+
+
+    // settinng the timezone value over here
+
+        function CallSuccess() {
+
+        }
+
+        // alert message on some failure
+        function CallFailed(res) {
+            alert(res.get_message());
+        }
+        function SetTimeZone() {
+            var offset = new Date().getTimezoneOffset();
+            PageMethods.SetTimeZone(offset, CallSuccess, CallFailed);
+        }
 
         function AjaxCallBack(objThis, strDate, intStaffId, status, strType) {
             if (window.XMLHttpRequest) {
@@ -784,6 +800,7 @@
                                     <asp:ImageButton runat="server" ImageAlign="Left" ID="ImageButton1" BorderStyle="Outset" BorderColor="White" BorderWidth="2" Width="12%" Height="37px" ImageUrl="~/images/Tasks.jpg" OnClick="ImageButton1_Click"></asp:ImageButton>
                                     <asp:Button ID="TasksBtn" runat="server" Style="background-color: white; height: 40px; width: 73%; border-style: outset; border-width: 3px; border-color: white; cursor: pointer; font-family: Arial; font-size: small; font-weight: 200;" Text="Project Tasks" OnClick="TasksBtn_Click" />
                                     <asp:Label ID="Label2" Width="10%" runat="server" CssClass="label" Font-Bold="true" Font-Size="medium"></asp:Label>&nbsp
+                               
                                 </div>
                                 <div style="border-width: 3px; border-style: solid; border-color: #DAA520; width: 100%; height: 43px; border-radius: 15px;">
                                     <asp:ImageButton runat="server" ImageAlign="Left" ID="ImageMap2" BorderStyle="Outset" BorderColor="White" BorderWidth="2" Width="12%" Height="37px" ImageUrl="~/images/RoutineTasks.PNG" OnClick="ImageMap2_Click"></asp:ImageButton>

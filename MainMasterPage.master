@@ -265,7 +265,7 @@
 
 
     <form id="form1" runat="server">
-        <telerik:RadScriptManager ID="ScriptManager" runat="server"></telerik:RadScriptManager>
+        <telerik:RadScriptManager ID="ScriptManager" runat="server" EnablePageMethods="true"></telerik:RadScriptManager>
 
         <nav class="navbar navbar-inverse navbar-fixed-top">
 
