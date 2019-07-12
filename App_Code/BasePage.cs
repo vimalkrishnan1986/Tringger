@@ -10,6 +10,7 @@ using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
+using System.Web.Services;
 
 /// <summary>
 /// Summary description for BasePage
@@ -18,6 +19,7 @@ public class BasePage : Page
 {
     protected string _loginId { get; set; }
     const string _loginIdKey = "Login_Id";
+    public static string timeZoneKey = "TimeZone";
 
     public static string connectionstring
     {
@@ -27,11 +29,24 @@ public class BasePage : Page
         }
     }
 
+    [WebMethod]
+    public static void SetTimeZone(string timeZone)
+    {
+        SessionHelper.AddtoSession(timeZoneKey, Convert.ToInt32(timeZone));
+        // capture the user timezone information
+    }
+
+    public DateTime ConvertToLocal(DateTime utcTime)
+    {
+        var timeZoneOffset = SessionHelper.GetSessionValue<double>(timeZoneKey);
+        return utcTime.AddMinutes(timeZoneOffset);
+    }
+
     public static DateTime CurrentTime
     {
         get
         {
-            return DateTime.UtcNow.AddHours(5).AddMinutes(30);
+            return DateTime.UtcNow;
         }
 
     }

@@ -11,7 +11,7 @@ using System.Web.UI.HtmlControls;
 public partial class MainMasterPage : System.Web.UI.MasterPage
 {
     const string _adminKey = "Admin";
-    const string _loginKey = "Login_Id;";
+    const string _loginKey = "Login_Id";
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -25,12 +25,12 @@ public partial class MainMasterPage : System.Web.UI.MasterPage
     {
         const string sql = "GetMenu";
         const string relationName = "MenuSubmenuRelation";
-        bool isadmin = false;
+        
         int loginId = 0;
         loginId = SessionHelper.GetSessionValue<int>(_loginKey, loginId);
 
         SqlParameter[] sqlParameters = new SqlParameter[] {
-            new SqlParameter("@isAdmin", SessionHelper.GetSessionValue<bool>(_adminKey, isadmin)),
+            new SqlParameter("@isAdmin", SessionHelper.GetSessionValue<bool>(Convert.ToString(_adminKey))),
             new SqlParameter("@loginId",loginId )
         };
         DataSet dataSet = DataAccess.FillDataSet(sql, CommandType.StoredProcedure, sqlParameters);

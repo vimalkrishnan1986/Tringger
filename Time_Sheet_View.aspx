@@ -43,8 +43,7 @@
             );
         });
 
-
-    // settinng the timezone value over here
+        // settinng the timezone value over here
 
         function CallSuccess() {
 
@@ -82,7 +81,7 @@
             return true;
         }
 
-        function AjaxCallBack1(objThis, strDate, intStaffId, intNeed, intEditNeed, objLocation) {
+        function AjaxCallBack1(objThis, strDate, intStaffId, intNeed, intEditNeed, objLocationLat,objLocationLong) {
 
             if (window.XMLHttpRequest) {
                 xmlhttp = new XMLHttpRequest();
@@ -91,10 +90,10 @@
                 xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
             }
 
-            //alert(objLocation);
+            // alert(objLocation);
             //   alert(objLocation.value);
-            var strLocation = objLocation.value;
-            //alert(strLocation);
+            var strLocation = objLocationLat+','+objLocationLong;
+            // alert(strLocation);
 
             objThis.innerHTML = "<img src=\"/images/busy.gif\" border=0>";
             xmlhttp.onreadystatechange = function () {
@@ -481,13 +480,14 @@
             white-space: normal;
             word-wrap: break-word;
         }
+       
     </style>
 </asp:Content>
 <asp:Content runat="server" ID="MainContentId" style="height: 100%" ContentPlaceHolderID="MainContent">
 
 
-    <%--<asp:ScriptManager runat="server">
-    </asp:ScriptManager>
+    <!-- <%--<asp:ScriptManager runat="server">
+    </asp:ScriptManager> -->
     <asp:UpdateProgress ID="UpdateProgress1" AssociatedUpdatePanelID="UpdatePanel1" runat="server">
         <ProgressTemplate>
             <div style="position: fixed; top: 0px; bottom: 0px; left: 0px; right: 0px; overflow: hidden; padding: 0; margin: 0; background-color: #F0F0F0; filter: alpha(opacity=50); opacity: 0.5; z-index: 100000;">
@@ -534,7 +534,7 @@
                         <input type="button" value="Apply" runat="server" class="btn btn-default btn-xs" style="background-color: white;" onclick="if (FnValidation(event))" onserverclick="Load_Data" /></span>
 
                     <div style="margin-top: 10px;">
-                        <asp:Button ID="Button3" CssClass="btn btn-default btn-sm" Text="Show all Users" runat="server" OnClick="Button3_Click" />
+                        <asp:Button ID="Button3" CssClass="btn btn-default btn-sm" Text="Show all Users" runat="server" OnClick="Button3_Click" /><asp:HiddenField ID="AllUsersHdn" runat="server" Value="0"/>
                     </div>
                     <div>
                         <asp:Button ID="Button5" CssClass="btn btn-default btn-sm" Text="Your Records" runat="server" OnClick="Button5_Click" />
@@ -800,7 +800,6 @@
                                     <asp:ImageButton runat="server" ImageAlign="Left" ID="ImageButton1" BorderStyle="Outset" BorderColor="White" BorderWidth="2" Width="12%" Height="37px" ImageUrl="~/images/Tasks.jpg" OnClick="ImageButton1_Click"></asp:ImageButton>
                                     <asp:Button ID="TasksBtn" runat="server" Style="background-color: white; height: 40px; width: 73%; border-style: outset; border-width: 3px; border-color: white; cursor: pointer; font-family: Arial; font-size: small; font-weight: 200;" Text="Project Tasks" OnClick="TasksBtn_Click" />
                                     <asp:Label ID="Label2" Width="10%" runat="server" CssClass="label" Font-Bold="true" Font-Size="medium"></asp:Label>&nbsp
-                               
                                 </div>
                                 <div style="border-width: 3px; border-style: solid; border-color: #DAA520; width: 100%; height: 43px; border-radius: 15px;">
                                     <asp:ImageButton runat="server" ImageAlign="Left" ID="ImageMap2" BorderStyle="Outset" BorderColor="White" BorderWidth="2" Width="12%" Height="37px" ImageUrl="~/images/RoutineTasks.PNG" OnClick="ImageMap2_Click"></asp:ImageButton>
@@ -954,7 +953,7 @@
         function updateClock() {
             newDate = new Date();
             newStamp = newDate.getTime();
-            var diff = Math.round((newStamp - startStamp) / 1000);
+            var diff = Math.round((newStamp - startStamp) / 10000);
 
             var d = Math.floor(diff / (24 * 60 * 60)); /* though I hope she won't be working for consecutive days :) */
             diff = diff - (d * 24 * 60 * 60);
@@ -992,7 +991,7 @@
                 }
 
             }
-            if (secForAutoCheck > 600) {
+            if (secForAutoCheck > 6000) {
 
                 if ($('#orderModal').is(':visible') || $('.collapse').hasClass('in') || $('.modal').hasClass('in')) {
                     secForAutoCheck = 0;
@@ -1013,7 +1012,7 @@
 
             }
         }
-        setInterval(updateClock, 1000);
+        setInterval(updateClock, 10000);
 
         document.onmousemove = resetTimer;
         document.onkeypress = resetTimer;

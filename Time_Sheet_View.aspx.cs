@@ -12,7 +12,6 @@ using System.Xml.XPath;
 using System.Xml.Linq;
 using System.ComponentModel;
 using System.Data.SqlClient;
-using System.Web.Services;
 
 public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 {
@@ -36,15 +35,16 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 Session[Key] = Convert.ToString(Request.Cookies[Key].Value);
             }
         }
-        base.Page_Init(sender, e);
+        //base.Page_Init(sender, e);
     }
+
 
     protected void Page_Load(object sender, EventArgs e)
     {
 
         tdMessage.InnerHtml = "";
         if (!IsPostBack)
-        {    
+        {
             if (Session["IsAlreadyLoad"] == null)
             {
                 ShiftPendingTasks();
@@ -52,9 +52,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             }
             DateFrom.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
             DateTo.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
-           
-           Staff_Master_Staff_Name();
-           
+            Staff_Master_Staff_Name();
             int responseType = GetQueryStringValue<int>("ResponseType");
             List<int> applicableResponseTypes = new List<int> { 3, 2, -1, 5 };
 
@@ -68,16 +66,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         }
     }
 
-    [WebMethod]
-    public static void SetTimeZone(string timeZone)
-    {
-        SessionHelper.AddtoSession("TimeZone", timeZone);
-        // capture the user timezone information
-    }
-
     protected void PageReload(string strType)
     {
-
+        // Response.Write("jib");Response.End();
         switch (strType)
         {
             case "1":
@@ -87,6 +78,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 break;
             case "0":
                 SuccessMessage("Record has been successfully deleted in the database.", tdMessage);
+                this.InputValue = "0";
+                Load_Data1("");
+                break;
+            case "3":
+                // SuccessMessage("Record has been successfully deleted in the database.", tdMessage);
                 this.InputValue = "0";
                 Load_Data1("");
                 break;
@@ -106,7 +102,12 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 break;
         }
     }
-
+    protected void Page_Error(object sender, EventArgs e)
+    {
+        Exception Ex = Server.GetLastError();
+        Server.ClearError();
+        Response.Redirect("Error.aspx");
+    }
     protected void ModalCloseClick(object sender, EventArgs e)
     {
 
@@ -135,7 +136,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
     }
     protected void Load_Data(object sender, EventArgs e)
     {
-        Load_Data1("");
+        Load_Data1(""); AllUsersHdn.Value = "0";
         ModalCloseBtn.Attributes.Add("Mvalue", "0");
         //TdReport.InnerHtml=GenerateChart();
     }
@@ -166,14 +167,14 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                         aryReturn[1] += "<div class=\"label\" style=\"float:inherit;color:#773636;text-align:-webkit-center; border-width:2px;border-color:gray;border-style:outset; width:100%;background-color:#fdeedd;border-radius:5px;\"><a href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes..</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a><br/><iframe style=\"width:250px; height:210px; border-radius:10px; border-style:outset; border-width:0px;\" scrolling=\"no\" frameborder=\"0\" src=\"../UsersMap.aspx?Staff_Id=" + strStaffName + "&ThDa=" + strDate + "\" ></iframe></div>";
                     }
                 }
-                //else
-                //{
+                // else
+                // {
                 //    if (IsField == "1")
                 //    {
                 //        aryReturn[1] += "<div class=\"label\" style=\"float:inherit;color:#773636;text-align:-webkit-center; border-width:2px;border-color:gray;border-style:outset; width:100%;background-color:#fdeedd;border-radius:5px;\"><a href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes..</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a><br/><iframe style=\"width:250px; height:210px; border-radius:10px; border-style:outset; border-width:0px;\" scrolling=\"no\" frameborder=\"0\" src=\"../UsersMap.aspx?Staff_Id=" + strStaffName + " & ThDa = " + strDate + "\" ></iframe></div>";
                 //    }
 
-                //}
+                // }
             }
             else if (Convert.ToString(objTable.Rows[0]["Approve_Status"]) == "Approved")
             {
@@ -216,19 +217,20 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                     }
                     else
                     {
-                        //aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
+                        aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
                     }
                 }
                 else
                 {
-                    //if (IsField == "1")
-                    //{
-                    //    aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a><br/><iframe style=\"width:250px; height:210px; border-radius:10px; border-style:outset; border-width:0px;\" scrolling=\"no\" frameborder=\"0\" src=\"../UsersMap.aspx?Staff_Id=" + strStaffName + "&ThDa=" + strDate + "\" ></iframe></div></div>";
-                    //}
-                    //else
-                    //{
-                    //    //aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
-                    //}
+                    if (IsField == "1")
+                    {
+                        aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
+                        //    aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a><br/><iframe style=\"width:250px; height:210px; border-radius:10px; border-style:outset; border-width:0px;\" scrolling=\"no\" frameborder=\"0\" src=\"../UsersMap.aspx?Staff_Id=" + strStaffName + "&ThDa=" + strDate + "\" ></iframe></div></div>";
+                    }
+                    else
+                    {
+                        aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
+                    }
                 }
             }
             else
@@ -247,15 +249,16 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 }
                 else
                 {
-                    //if (IsField == "1")
-                    //{
-                    //    aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div></div>";
+                    if (IsField == "1")
+                    {
+                        aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
+                        //    aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"TimeSheetMap.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Routes</a><a class=\"label\" target='_blank' class=\"quotepopup BlueBar2 label\"" + " style=\"width:50px;height:30px;\" href=\"ExpensesList.aspx?TimeSheetId=&TaskId=&StaffId=" + strStaffName + "&Date=" + ThisDate + "&Action=\">Tracks</a><a class=\"label\" href=\"Trip_Plan.aspx?StaffID=" + strStaffName + "&Type=2&Date=" + ThisDate + " \" target=\"_blank\" >Plan New Trip</a><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div></div>";
 
-                    //}
-                    //else
-                    //{
-                    //    aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
-                    //}
+                    }
+                    else
+                    {
+                        aryReturn[1] = "<div style=\"text-align:center;\"><br /><a class=\"label\" href=\"/Leave_Master/Leave_Master.aspx?ThisStaff_Id=" + strStaffName + "&LeaveDate='" + strDate + "'\">Leaves..</a></div>";
+                    }
                 }
             }
 
@@ -267,17 +270,27 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void ShiftPendingTasks()
     {
-        const string query = "Shiftpendingtasks";
-        DataAccess.ExecuteNonQuery(query, CommandType.StoredProcedure, new SqlParameter[] {
+        try
+        {
+            const string query = "Shiftpendingtasks";
+            DataAccess.ExecuteNonQuery(query, CommandType.StoredProcedure, new SqlParameter[] {
             new SqlParameter("@loginId", _loginId),
             new SqlParameter("@date", GetIstDate())
         });
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+
     }
+
 
 
     protected void CheckForUnAssignedOrders()
     {
-        if (SessionHelper.GetSessionValue<Int16>(_isFinalDepartmentKey)!=1)
+        if (SessionHelper.GetSessionValue<Int16>(_isFinalDepartmentKey) != 1)
         {
             CheckForAllUnAssignedProcessOrders();
             return;
@@ -308,9 +321,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             CheckForAllUnAssignedProcessOrders();
             return;
         }
-        //Response.Write(Session["IsFinalDepartment"].ToString());
-
-        //Response.Write(Session["IsFinalDepartment"].ToString() + " Is available<br />");
 
         string ThisStaff = "";
         string This = "select * from Enquiries where Cast (Time as date) <= Cast ('" + GetDateAsDatetime() + "' as date) and BMode=2 and Status !=5 ";
@@ -609,54 +619,24 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         {
             LastLoc = "";
         }
-        // string strText = LastLoc.Trim();
-        // string strText2 = "";
-        //string[] strArr = strText.Split(',');
-        // int count = 0;
-        // for (int i = 0; i < strArr.Length; i++)
-        // {
-        //     count++;
-        // }
-        // string label1= Convert.ToString(count);
 
-        // for (int i = 0; i < count ; i++)
-        // {
-
-        //     if (i == count -1)
-        //     {
-        //         strText2 += strArr[i].Trim() + ".";
-        //     }
-        //     else if (i == count - 2)
-        //     {
-        //         strText2 += strArr[i].Trim() + ", ";
-        //     }
-        //     else
-        //     {
-        //         if (!string.IsNullOrWhiteSpace(LastLoc))
-        //         {
-        //             strText2 += strArr[i].Trim() + ",\n";
-        //         }
-        //     }
-        // }
-        // string modifiedString = strText2.Replace("@", "").Replace(";", "").Replace("'", "").Replace("/", "");
-
-        //LastLocation.Value = modifiedString;
         LastLocation.Value = LastLoc;
     }
     protected void Load_Data1(string Query)
     {
+
         Int16 isInitialDepartment = 0;
         Int16 isFinalDepartment = 0;
 
         isInitialDepartment = SessionHelper.GetSessionValue<Int16>(_isinitialDepartmentKey, isInitialDepartment);
         isFinalDepartment = SessionHelper.GetSessionValue<Int16>(_isFinalDepartmentKey, isFinalDepartment);
 
-        if (isInitialDepartment==1)
+        if (isInitialDepartment == 1)
         {
             CheckForUnAssignedOrders();
         }
 
-        if (isFinalDepartment==1)
+        if (isFinalDepartment == 1)
         {
             CheckForUnAssignedDeliveries();
         }
@@ -681,6 +661,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         }
         string IsField = "0";
         string strEmpId = Convert.ToString(Session["Login_Id"]);
+        // Staff_Name.SelectedValue= Convert.ToString(Session["Login_Id"]);
         string strWhere = " SELECT * from TimeSheetViewAllDates";
         Session["Company_Unit_Name"] = Company_Unit_Name.SelectedValue;
         Session["Staff_Id"] = Staff_Name.SelectedValue;
@@ -701,15 +682,31 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 strWhere += " WHERE Staff_Id IN (" + Convert.ToString(Staff_Name.SelectedValue) + ")";
                 intCheck = 1;
             }
-            else if (!Convert.ToBoolean(Session["Admin"]))
+            else
             {
-                strWhere += " WHERE Staff_Id IN(SELECT [Staff_Id] FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
+                if (AllUsersHdn.Value == "1")
+                {
+                    strWhere += " WHERE Staff_Id IN(SELECT [Staff_Id] FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
                              " UNION " +
                              " SELECT [Staff_Id]  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN(SELECT ISNULL(Reporting_Staff,0) FROM Reporting_Master WHERE Responsible_Staff IN('" + Convert.ToString(strEmpId) + "') ) )";
+
+                }
+                else
+                {
+                    strWhere += " WHERE Staff_Id = '" + strEmpId + "'";
+                }
+
                 intCheck = 1;
             }
+            // else if (!Convert.ToBoolean(Session["Admin"]))
+            // {
+            //     strWhere += " WHERE Staff_Id IN(SELECT [Staff_Id] FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
+            //                  " UNION " +
+            //                  " SELECT [Staff_Id]  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN(SELECT ISNULL(Reporting_Staff,0) FROM Reporting_Master WHERE Responsible_Staff IN('" + Convert.ToString(strEmpId) + "') ) )";
+            //     intCheck = 1;
+            // }
         }
-
+        // Response.Write("ersse"+Staff_Name.SelectedValue);Response.End();
         if (Convert.ToString(Company_Unit_Name.SelectedValue) != "")
         {
             strWhere += ((intCheck == 1) ? " AND " : " Where ") + " Company_Unit_Name='" + Convert.ToString(Company_Unit_Name.SelectedItem.Text) + "'";
@@ -721,8 +718,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         }
         //Response.Write(strWhere + " ORDER BY Staff_Name Asc, Task_Date DESC, Start_Time Asc");
         //Response.End();
-
-        // performance opitmization needed over here
         DataTable objTable = FillTable(strWhere + " ORDER BY Staff_Name Asc, Task_Date DESC, Start_Time Asc");
 
         if (objTable.Rows.Count <= 0)
@@ -793,35 +788,27 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             EnteredDate = objRow["Entered_Date"].ToString();
             strHTML += "";
             IsField = objRow["Is_Field"].ToString();
-
-            if (IsField == "1")
+            // Response.Write(objRow["LatLong"].ToString()+"ersse"+Staff_Name.SelectedValue);Response.End();
+            if (!string.IsNullOrWhiteSpace(objRow["LatLong"].ToString()))
             {
+                //Response.Write(objRow["LatLong"].ToString()); Response.End();
+                string Lat = objRow["LatLong"].ToString().Split(',')[0];
+                string Long = objRow["LatLong"].ToString().Split(',')[1];
+                // calcularRota(Lat, Long);
 
-                if (!string.IsNullOrWhiteSpace(objRow["LatLong"].ToString()))
+                //strHTML += "<tr><td style=\"background-color:#ffffff; \" colspan=\"4\" width=\"100%\">Last Seen at : " + LastLocation.Value + "</td></tr>";
+                if (strStaff_Id == Session["Login_Id"].ToString())
                 {
-                    //Response.Write(objRow["LatLong"].ToString()); Response.End();
-                    string Lat = objRow["LatLong"].ToString().Split(',')[0];
-                    string Long = objRow["LatLong"].ToString().Split(',')[1];
-                    calcularRota(Lat, Long);
+                    LastLocation.Value = objRow["LatLong"].ToString();
 
-                    //strHTML += "<tr><td style=\"background-color:#ffffff; \" colspan=\"4\" width=\"100%\">Last Seen at : " + LastLocation.Value + "</td></tr>";
-                    if (strStaff_Id == Session["Login_Id"].ToString())
-                    {
-                        if (LastLocation.Value != "0")
-                        {
-                            Session["Location"] = LastLocation.Value;
-                        }
-                    }
-                }
-                else
-                {
-                    LastLocation.Value = "0";
+                    // Session["Location"] = LastLocation.Value;
                 }
             }
             else
             {
                 LastLocation.Value = "0";
             }
+
             if (objRow["End_Date"].ToString() != "" && objRow["End_Date"].ToString() != null)
             {
                 EndDate = Convert.ToDateTime(objRow["End_Date"].ToString());
@@ -839,11 +826,11 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                         if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                         {
                             strEmptyCell = "";
-                            arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights);
+                            arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights, LastLocation.Value);
                         }
                         else
                         {
-                            arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights);
+                            arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights, LastLocation.Value);
                         }
                         if (strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                         {
@@ -861,7 +848,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                         string strToolTipText22 = "Click this button to plan and schedule various tasks or reminders.";
                         string tooltip22 = " onMouseover=\"ddrivetip('" + strToolTipText22 + "')\" onmouseout=\"hideddrivetip()\"";
                         strEmptyCell = "<div style=\"text-align:center;\">" +
-                                                 "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip22 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
+                                                 "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip22 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder</span></button><br /><br />";
                         if (aryLodData[intPrintLoop] != "")
                         {
                             if (aryApprove[intPrintLoop] == "" && Convert.ToInt32(aryApprovecheck[intPrintLoop]) > 0 && ApproveRights)
@@ -926,7 +913,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 {
                     strStaff_Id = Convert.ToString(objRow["Staff_Id"]); // VIB Note
                     strBorder = "";
-                    LastLocation.Value = Convert.ToString(objRow["LatLong"]);
+
                     if (Convert.ToDateTime(aryFullDate[intLoop]) == Convert.ToDateTime(objRow["Time_Sheet_Date"]))
                     {
                         DateTime ThisDt = Convert.ToDateTime(objRow["Time_Sheet_Date"].ToString() + " " + objRow["Start_Time"].ToString());
@@ -1019,10 +1006,10 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                     //open/done buttons - start                                       
 
-                                    aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button><a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UPV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div>";
+                                    aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button><a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UPV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div>";
 
 
-                                    aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul class=\"dropdown-menu dropdown-menu-right\" style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UOVD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Reject' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
+                                    aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul class=\"dropdown-menu dropdown-menu-right\" style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UOVD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Reject' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
                                     //open/done buttons - end                                       
                                     //dropdown content(more) when clicking big button - start
                                     aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDateAsDatetime() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
@@ -1162,9 +1149,9 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                         //open/done buttons - start
                                         aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" data-toggle=\"modal\" data-target=\"#orderModal\" " + strToolTip + ">Open</button>";
 
-                                        aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
 
-                                        aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\" class=\"dropdown-menu dropdown-menu-right\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=2&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&PostCode=" + Convert.ToString(objRow["PostCode"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Primary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li><li><a style=\"background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=3&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Secondary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
+                                        aryLodData[intLoop] += "<div class=\"btn-group dropup\"><button style=\"border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\" class=\"btn btn-default btn-sm dropdown-toggle\" type=\"button\" data-toggle=\"dropdown\">Options<span class=\"caret\"></span></button><ul style=\"background-color:rgb(224, 222, 205); border-radius:15px; border-width:0px;; font-size:small;\" class=\"dropdown-menu dropdown-menu-right\"><li><a style=\"margin-top:-10px; background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=2&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&PostCode=" + Convert.ToString(objRow["PostCode"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Primary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li><li><a style=\"background-color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=3&Action=UOV&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Accept As Secondary Driver' style=\" border-radius:7px; background-color:#ebe8ed\"/></a></li></a></div></center>";
                                         //open/done buttons - end                                       
                                         //dropdown content(more) when clicking big button - start
                                         aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr><tr><td><a class=\"label\" style=\"font-size:16px;border-width:3px;border-color:#e6e5e5;border-style:ridge;background-color:beige;\" href=\"Trip_PlanAuto.aspx?StaffID=" + strStaff_Id + "&Type=2&Mode=Dest&Date=" + GetDateAsDatetime() + "\" target=\"_blank\" >Proceed to Destination</a></td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div><p>";
@@ -1195,8 +1182,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                             {
                                                 aryLodData[intLoop] += "<span style=\"font-weight:bold;\">CRM Task</span><button style=\"background-color:#dbd9d0; margin-bottom:10px; text-align:right; padding:3px; color:#000000; border-radius: 7px;\" class=\"btn btn-md btn-default dropdown-toggle\" type=\"button\" data-toggle=\"collapse\" data-target=\"" + DynId + "\" aria-expanded=\"false\" aria-controls=\"" + DynId2 + "\"><table class=\"table table-striped\"><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"width:60%; text-align:left;\">Name</td><td style=\"width:40%; text-align:left;\">Type</td></tr></thead><tbody style=\"text-align:left;\"><tr><th scope=\"col\">" + objRow["LeadName"] + "</th>" + DMode + "</tr><tr style=\"background-color:#e0dfde; text-align:center;\" align=\"center\" ><td colspan=\"2\" style=\"align:center;\"></td></tbody></table><span class=\"caret\" style=\"float:left; font-size:small;  margin-top:-43px\">Expand  -  Activity starting at : " + objRow["Start_Time"] + "</span><div style=\"margin-top:-20px; font-size:10px; text-align:center; background-color:" + Convert.ToString(objRow["Color_Code"]) + ";\">Order No. " + objRow["OrderNo"] + " - Current Process : <b>" + objRow["Status_Details"] + "</b></div></button>";
                                                 aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\"  " + strToolTip + " data-toggle=\"modal\" data-target=\"#orderModal\" " + strToolTip + ">Open</button>";
-                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&Location=" + Convert.ToString(objRow["Location"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
+                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&Location=" + LastLocation.Value + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
                                  "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" +
                                  "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                  "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
@@ -1210,7 +1197,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 {
                                                     if (Convert.ToString(objRow["TaskReplan"]) != "y")
                                                     {
-                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VC&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&CampaignID=" + Convert.ToString(objRow["CampaignID"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VC&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&CampaignID=" + Convert.ToString(objRow["CampaignID"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
                                                     }
                                                     else
                                                     {
@@ -1231,8 +1218,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                                 aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" " + strToolTip + " data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button>";
 
-                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
+                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
                                 "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" +
                                 "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                 "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
@@ -1246,7 +1233,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 {
                                                     if (Convert.ToString(objRow["TaskReplan"]) != "y")
                                                     {
-                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&DMode=3&CampaignID = " + Convert.ToString(objRow["CampaignID"]) + "\"\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div></center>";
+                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&DMode=3&CampaignID = " + Convert.ToString(objRow["CampaignID"]) + "\"\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div></center>";
                                                     }
                                                     else
                                                     {
@@ -1258,10 +1245,10 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                                 aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div>";
 
-                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" >" +
+                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" >" +
                                         "<input type='button' class=\"btn btn-default btn-sm\"  value='Done..' style=\" border-radius: 10px;\"/>" +
                                        "</p></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
                                 "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" +
                                 "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                 "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
@@ -1280,8 +1267,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 aryLodData[intLoop] += "<span style=\"font-weight:bold;\">CRM Task</span>" +
                                                     "<button style=\"background-color:#dbd9d0; margin-bottom:10px; text-align:right; padding:3px; color:#000000; border-radius: 7px;\" class=\"btn btn-md btn-default dropdown-toggle\" type=\"button\" data-toggle=\"collapse\" data-target=\"" + DynId + "\" aria-expanded=\"false\" aria-controls=\"" + DynId2 + "\"><table class=\"table table-striped\"><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"width:60%; text-align:left;\">Name</td><td style=\"width:40%; text-align:left;\">Type</td></tr></thead><tbody style=\"text-align:left;\"><tr><th scope=\"col\">" + objRow["LeadName"] + "</th>" + DMode + "</tr><tr style=\"background-color:#e0dfde; text-align:center;\" align=\"center\" ><td colspan=\"2\" style=\"align:center;\"></td></tbody></table><span class=\"caret\" style=\"float:left; font-size:small;  margin-top:-43px\">Expand  -  Activity starting at : " + objRow["Start_Time"] + "</span><div style=\"margin-top:-20px; font-size:10px; text-align:center; background-color:" + Convert.ToString(objRow["Color_Code"]) + ";\">Order No. " + objRow["OrderNo"] + " - Current Process : <b>" + objRow["Status_Details"] + "</b></div></button>";
                                                 aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" " + strToolTip + " data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button>";
-                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
+                                                aryLodData[intLoop] += "<a style=\"color:transparent\" class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
                                 "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" +
                                 "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                 "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
@@ -1295,7 +1282,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 {
                                                     if (Convert.ToString(objRow["TaskReplan"]) != "y")
                                                     {
-                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&DMode=3&CampaignID = " + Convert.ToString(objRow["CampaignID"]) + "\"\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div></center>";
+                                                        aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VD&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Batch=" + Disp + "&Staff_Id=" + strStaff_Id + "&DMode=3&CampaignID = " + Convert.ToString(objRow["CampaignID"]) + "\"\" ><input type='button' class=\"btn btn-default btn-sm\" value='Batch' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div></center>";
                                                     }
                                                     else
                                                     {
@@ -1307,10 +1294,10 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                                 aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div>";
 
-                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" >" +
+                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" >" +
                                         "<input type='button' class=\"btn btn-default btn-sm\"  value='Done..' style=\" border-radius: 10px;\"/>" +
                                        "</p></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" +
                                 "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" +
                                 "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                 "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
@@ -1326,8 +1313,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 aryLodData[intLoop] += "<span style=\"font-weight:bold;\">CRM Task</span><button style=\"background-color:#dbd9d0; margin-bottom:10px; text-align:right; padding:3px; color:#000000; border-radius: 7px;\" class=\"btn btn-md btn-default dropdown-toggle\" type=\"button\" data-toggle=\"collapse\" data-target=\"" + DynId + "\" aria-expanded=\"false\" aria-controls=\"" + DynId2 + "\"><table class=\"table table-striped\"><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"width:60%; text-align:left;\">Name</td><td style=\"width:40%; text-align:left;\">Type</td></tr></thead><tbody style=\"text-align:left;\"><tr><th scope=\"col\">" + objRow["LeadName"] + "</th>" + DMode + "</tr><tr style=\"background-color:#e0dfde; text-align:center;\" align=\"center\" ><td colspan=\"2\" style=\"align:center;\"></td></tbody></table><span class=\"caret\" style=\"float:left; font-size:small;  margin-top:-43px\">Expand  -  Activity starting at : " + objRow["Start_Time"] + "</span><div style=\"margin-top:-20px; font-size:10px; text-align:center; background-color:" + Convert.ToString(objRow["Color_Code"]) + ";\">Order No. " + objRow["OrderNo"] + " - Current Process : <b>" + objRow["Status_Details"] + "</b></div></button>";
                                                 //big button with name/type table on it - end
                                                 //open/done buttons - start
-                                                aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" " + strToolTip + " data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button><a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
-                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" + "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" + "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
+                                                aryLodData[intLoop] += "<center><div><button type =\"button\" data-whatever= \"../CRM/ProductsList.aspx?Enquiry=" + objRow["OrderNo"].ToString() + "&LeadId=" + LeadId + "&Campaign=" + CampaignID + "&TaskID=" + task_Id + " \" class=\"btn btn-default btn-sm\"  style=\"border-radius:7px; margin-top:-10px; margin-left:5px; margin-right:5px; width:100px; display:inline; background-color:#ebe8ed;\" " + strToolTip + " data-toggle=\"modal\" data-target=\"#orderModal\" >Open</button><a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Done..' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                                aryLodData[intLoop] += "<br/><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=VVS&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&Task_Id=" + Convert.ToString(objRow["task_name"]) + "\" >" + "<input type='button' class=\"btn btn-default btn-sm\" value='Start Job' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/>" + "</a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) +
                                  "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) +
                                  "&task_id=" + Convert.ToString(objRow["task_name"]) + "&status_id=" + Convert.ToString(objRow["Status_Id"]) + "&id=&Action=NN\" onclick=\"return hs.htmlExpand(this, { objectType: 'iframe' } )\" >" +
                                 "<input type ='button' class=\"btn btn-default btn-sm\" value='Edit / Add Details' style=\" border-radius:7px; width:125px; display:inline;  background-color:#ebe8ed\"/></a></div></center>";
@@ -1335,7 +1322,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                                 //dropdown content(more) when clicking big button - start
                                                 aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;> <div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table table-striped table-bordered\" > <thead> <tr> <th scope=\"col\">Status</th></thead> <tbody> <tr><th scope=\"row\" style=\"background-color:" + Convert.ToString(objRow["Color_Code"]) + " \">" + objRow["Status_Name"] + "</th></tr> </tbody></table><table class=\"table  table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Ord#</th><th scope=\"col\">Ph#</th><th scope=\"col\">Time</th></tr> </thead> <tbody> <tr><th scope=\"row\">" + objRow["OrderNo"] + "</th><td>" + objRow["LeadType"] + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Address</th></tr> </thead> <tbody> <tr><td>" + objRow["Address"] + " - Apt # - " + objRow["ApartmentNo"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Destination</th></tr> </thead> <tbody> <tr><td>" + objRow["DestAddress"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Permanent Instructions</th></tr></thead><tbody><tr><td>" + objRow["PInstructions"] + "</td></tr><tr><th scope=\"col\">Order Instructions</th></tr></thead><tbody><tr><td>" + objRow["DInstructions"] + "</td></tr></tbody><tr><th scope=\"col\">Order Activity Log</th></tr></thead><tbody><tr><td>" + objRow["Remarks"].ToString() + "</td></tr></tbody></table></div></div>";
 
-                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + Convert.ToString(objRow["Location"]) + "\" >" +
+                                                aryLodData[intLoop] += "<p><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupAxnV.aspx?RequestType=1&Action=V&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "&DMode=3&Location=" + LastLocation.Value + "\" >" +
                                            "<input type='button' class=\"btn btn-default btn-sm\"  value='Done..' style=\" border-radius: 10px;\"/>" +
                                           "</p></a></div></div>";
 
@@ -1480,13 +1467,13 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                 if (!string.IsNullOrWhiteSpace(Convert.ToString(objRow["task_name"])) && Convert.ToString(objRow["LeadName"]) == "")
                                 {
                                     aryLodData[intLoop] += "<tbody><tr><td colspan=\"5\" style=\"text-align:center; width:100%;\"><span style=\"font-weight:bold;\">Project Task</span><div style=\"display:inline; text-align:center; width:100%;\">";
-                                    aryLodData[intLoop] += "<center><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; background-color:#cbd0c9;\" data-whatever=\"Time_Sheet_Master_PopupForPlan.aspx?RequestType=1&Action=M&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&UniqueTrack=" + Convert.ToString(objRow["UniqueTrack"]) + "&Staff_Id=" + strStaff_Id + "\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" >Add More to this Activity</button></center></div>";
+                                    aryLodData[intLoop] += "<center><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; background-color:#cbd0c9;\" data-whatever=\"Time_Sheet_Master_PopupForPlan.aspx?RequestType=1&Action=M&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&UniqueTrack=" + Convert.ToString(objRow["UniqueTrack"]) + "&Staff_Id=" + strStaff_Id + "\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" >Add More to this Activity</button></center></div>";
                                     aryLodData[intLoop] += "<button style=\"background-color:#f3f8ea; margin-bottom:10px; text-align:right; padding:3px; color:#000000; border-radius: 7px;\" class=\"btn btn-md btn-default dropdown-toggle\" type=\"button\" data-toggle=\"collapse\" data-target=\"" + DynId + "\" aria-expanded=\"false\" aria-controls=\"" + DynId2 + "\"><table class=\"table table-striped\"><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"text-align:left;\">Scheduled for : " + EnteredDate + "</td></tr></thead><tbody style=\"text-align:left;\"><tr><th scope=\"col\"><spanwrap class=\"spanwrap\">" + objRow["Purpose_Code"] + "  " + objRow["Purpose_Name"] + "</spanwrap></th></tr></tbody><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"text-align:left; background-color:" + Convert.ToString(objRow["Color_Code"]) + "; \">" + objRow["Status_Name"] + "</td></tr></thead>";
                                     //Dynamic action button starting from here.
 
                                     aryLodData[intLoop] += "<center><div><tr style=\"background-color:#e0dfde; text-align:center;\" align=\"center\" ><td colspan=\"2\" style=\"align:center;\"></td></tbody></table>More " + objRow["OrderNo"] + "<span class=\"caret\"></span></button>";
 
-                                    aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Action=Q&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Progress' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&task_id=" + Convert.ToString(objRow["task_name"]) + "&status_id=" + Convert.ToString(objRow["Status_Id"]) + "&id=&Action=NN\" onclick=\"return hs.htmlExpand(this, { objectType: 'iframe' } )\" >" +
+                                    aryLodData[intLoop] += "<a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Action=Q&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-default btn-sm\" value='Progress' style=\" border-radius:7px; width:100px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a><a class=\"arefPlain\" href=\"Time_Sheet_Master_PopupReplan.aspx?RequestType=1&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&task_id=" + Convert.ToString(objRow["task_name"]) + "&status_id=" + Convert.ToString(objRow["Status_Id"]) + "&id=&Action=NN\" onclick=\"return hs.htmlExpand(this, { objectType: 'iframe' } )\" >" +
                     "<input type ='button' class=\"btn btn-default btn-sm\" value='Edit / Add Details' style=\" border-radius:7px; width:125px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a></div></center>";
                                     //big button with name/type table on it - end
 
@@ -1496,22 +1483,22 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                     if (Convert.ToString(objRow["Status_Id"]) == "1")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Start' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Start' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "2")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "3")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='PostPone' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='PostPone' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "4")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:5px; background-color:#ebe8ed\"/></a>";
                                     }
                                     aryLodData[intLoop] += "</div></center>";
-                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;><div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead><tr> <th scope=\"col\">Entered By</th><th scope=\"row\">" + objRow["Entered_By"].ToString() + "</th></tr> <tr><th scope=\"col\">Entered On</th><th scope=\"col\">Scheduled for</th></tr> </thead> <tbody> <tr><td>" + Convert.ToDateTime(objRow["Entered_Date"]).ToShortDateString() + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Activity Log</th></tr> </thead> <tbody> <tr><td>" + objRow["Remarks"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Start Location</th><th scope=\"col\">End Location</th></tr></thead><tbody><tr><td>" + objRow["Location"] + "</td><td>" + objRow["End_Location"] + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\"  >" +
+                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;><div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead><tr> <th scope=\"col\">Entered By</th><th scope=\"row\">" + objRow["Entered_By"].ToString() + "</th></tr> <tr><th scope=\"col\">Entered On</th><th scope=\"col\">Scheduled for</th></tr> </thead> <tbody> <tr><td>" + Convert.ToDateTime(objRow["Entered_Date"]).ToShortDateString() + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Activity Log</th></tr> </thead> <tbody> <tr><td>" + objRow["Remarks"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Start Location</th><th scope=\"col\">End Location</th></tr></thead><tbody><tr><td>" + objRow["Location"] + "</td><td>" + objRow["End_Location"] + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\"  >" +
                                    "<input type='button' class=\"btn btn-default btn-sm\"  value='Done..' style=\" border-radius: 10px;\"/>" +
                                   "</p></a><p><a href=\"TimeSheetMap.aspx?StaffID=" + Convert.ToString(objRow["Staff_Id"]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "\" target=\"_blank\" >" + "<input type='button' class=\"btn btn-default btn-sm\"  value='Map' style=\" border-radius: 10px;\"/></a></p></div>";
                                 }
@@ -1519,7 +1506,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                                 {
 
                                     aryLodData[intLoop] += "<tbody><tr><td colspan=\"5\" style=\"text-align:center; width:100%;\"><div style=\"display:inline; text-align:center; width:100%;\">";
-                                    aryLodData[intLoop] += "<center><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; background-color:#cbd0c9;\" data-whatever=\"Time_Sheet_Master_PopupForPlan.aspx?RequestType=1&Action=M&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&UniqueTrack=" + Convert.ToString(objRow["UniqueTrack"]) + "&Staff_Id=" + strStaff_Id + "\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" >Add / Edit </button></center></div>";
+                                    aryLodData[intLoop] += "<center><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center; background-color:#cbd0c9;\" data-whatever=\"Time_Sheet_Master_PopupForPlan.aspx?RequestType=1&Action=M&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&UniqueTrack=" + Convert.ToString(objRow["UniqueTrack"]) + "&Staff_Id=" + strStaff_Id + "\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" >Add / Edit </button></center></div>";
 
                                     aryLodData[intLoop] += "<br /><span style=\"font-weight:bold;\">Activity / Reminder / Memo</span><button style=\"background-color:#acb39d; margin-bottom:10px; text-align:right; padding:3px; color:#000000; border-radius: 7px;\" class=\"btn btn-md btn-default dropdown-toggle\" type=\"button\" data-toggle=\"collapse\" data-target=\"" + DynId + "\" aria-expanded=\"false\" aria-controls=\"" + DynId2 + "\"><table class=\"table table-striped\"><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"text-align:left;\">Scheduled for : " + EnteredDate + "</td></tr></thead><tbody style=\"text-align:left;\"><tr><th scope=\"col\"><spanwrap class=\"spanwrap\">" + objRow["Purpose_Code"] + " -- : >> " + objRow["Activity"] + "</spanwrap></th></tr></tbody><thead style=\" background-color:#dbd9d0;\"><tr><td style=\"text-align:left; background-color:" + Convert.ToString(objRow["Color_Code"]) + "; \">" + objRow["Status_Name"] + "</td></tr></thead>";
                                     //Dynamic action button starting from here.
@@ -1533,22 +1520,22 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
                                     if (Convert.ToString(objRow["Status_Id"]) == "1")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Start' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Start' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "2")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "3")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='PostPone' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='PostPone' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
                                     }
                                     else if (Convert.ToString(objRow["Status_Id"]) == "4")
                                     {
-                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
+                                        aryLodData[intLoop] += "<a class=\"arefPlain\"  style=\"color:transparent;\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\" ><input type='button' class=\"btn btn-danger btn-sm\" value='Done' style=\" border-radius:7px; width:75px; display:inline; margin-top:-10px; background-color:#ebe8ed\"/></a>";
                                     }
                                     aryLodData[intLoop] += "</div></center>";
-                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;><div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead><tr> <th scope=\"col\">Entered By</th><th scope=\"row\">" + objRow["Entered_By"].ToString() + "</th></tr> <tr><th scope=\"col\">Entered On</th><th scope=\"col\">Scheduled for</th></tr> </thead> <tbody> <tr><td>" + Convert.ToDateTime(objRow["Entered_Date"]).ToShortDateString() + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Activity Log</th></tr> </thead> <tbody> <tr><td>" + objRow["Remarks"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Start Location</th><th scope=\"col\">End Location</th></tr></thead><tbody><tr><td>" + objRow["Location"] + "</td><td>" + objRow["End_Location"] + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + Convert.ToString(objRow["Location"]) + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\"  >" +
+                                    aryLodData[intLoop] += "<div class=\"collapse\" id=\"" + DynId2 + "\"><div style=\"margin-bottom:-30px; margin-top:-20px;\" class=\"card card-body\"><div id=\"jumbo-center\" class=\"jumbotron\" style=\"padding:10px; margin-top:0px;><div style=\"float:center; padding:5px;width:10%;background-color:" + Convert.ToString(objRow["Color_Code"]) + "; border-radius: 10px;" + strBorder + "\"><table class=\"table  table-striped table-bordered\"> <thead><tr> <th scope=\"col\">Entered By</th><th scope=\"row\">" + objRow["Entered_By"].ToString() + "</th></tr> <tr><th scope=\"col\">Entered On</th><th scope=\"col\">Scheduled for</th></tr> </thead> <tbody> <tr><td>" + Convert.ToDateTime(objRow["Entered_Date"]).ToShortDateString() + "</td><td>" + EnteredDate + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"> <thead> <tr> <th scope=\"col\">Activity Log</th></tr> </thead> <tbody> <tr><td>" + objRow["Remarks"] + "</td></tr> </tbody></table><table class=\"table table-striped table-bordered\"><thead><tr><th scope=\"col\">Start Location</th><th scope=\"col\">End Location</th></tr></thead><tbody><tr><td>" + objRow["Location"] + "</td><td>" + objRow["End_Location"] + "</td></tr></tbody></table></div></div><p><a class=\"arefPlain\" href=\"Time_Sheet_Master_Popup.aspx?RequestType=1&Action=P&Date=" + Convert.ToDateTime(aryFullDate[intLoop]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "&StatusID=" + Convert.ToString(objRow["Status_Id"]) + "&Location=" + LastLocation.Value + "&task_Id=" + Convert.ToString(objRow["task_name"]) + "&Staff_Id=" + strStaff_Id + "\"  >" +
                                    "<input type='button' class=\"btn btn-default btn-sm\"  value='Done..' style=\" border-radius: 10px;\"/>" +
                                   "</p></a><p><a href=\"TimeSheetMap.aspx?StaffID=" + Convert.ToString(objRow["Staff_Id"]) + "&Time_Sheet_Id=" + Convert.ToString(objRow["Time_Sheet_Id"]) + "\" target=\"_blank\" >" + "<input type='button' class=\"btn btn-default btn-sm\"  value='Map' style=\" border-radius: 10px;\"/></a></p></div>";
                                     aryLodData[intLoop] += "</table>";
@@ -1669,31 +1656,48 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         {
             DeadLinedPickup.Visible = false;
         }
+
         if (strStaffName != "")
         {
             for (int intPrintLoop = 0; intPrintLoop < aryLodData.Length; intPrintLoop++)
             {
+                string ThisDate2 = CurrentTime.Date.ToString("MM/dd/yyyy");
+                string[] arySignInSignOut;
+                string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
+
+                if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                {
+                    // Response.Write(Convert.ToInt32(Session["Login_Id"])+"..."+Convert.ToInt32(strStaff_Id)+"...."+strFullDate+"...."+Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))));Response.End();
+                    strEmptyCell = "";
+                    arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights, LastLocation.Value);
+                }
+                else
+                {
+                    arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights, LastLocation.Value);
+                }
+
+
                 string But44 = "#" + strStaff_Id;
                 string But55 = "" + strStaff_Id;
                 string But66 = "" + strStaff_Id + "##";
                 string strToolTipText2 = "Click this button to plan and schedule various tasks or reminders.";
                 string tooltip2 = " onMouseover=\"ddrivetip('" + strToolTipText2 + "')\" onmouseout=\"hideddrivetip()\"";
-                string[] arySignInSignOut;
-                string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
-                if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
-                {
-                    strEmptyCell = "";
-                    arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights);
-                    if (aryCheck[intPrintLoop])
-                    {
-                        strEmptyCell = "<tr><td style=\"text-align:center;\"><div style=\"text-align:center;\">" +
-                           "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
-                    }
-                }
-                else
-                {
-                    arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights);
-                }
+                // string[] arySignInSignOut;
+                // string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
+                // if (Convert.ToInt32(Session["Login_Id"]) == Convert.ToInt32(strStaff_Id) && strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                // {                    
+                //     strEmptyCell = "";
+                //     arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, true, ApproveRights,LastLocation.Value);
+                //     if (aryCheck[intPrintLoop])
+                //     {
+                //         strEmptyCell = "<tr><td style=\"text-align:center;\"><div style=\"text-align:center;\">" +
+                //            "<br /><br /><button type =\"button\" class=\"btn btn-danger btn-sm\" style=\"font-size:medium;float:center;   background-color:#acb39d;\" data-whatever=\"Time_Sheet_Master_Plan.aspx?RequestType=1 &Date=" + Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) + "&Staff_Id=" + strStaff_Id + "&Time_Sheet_Id=0&id=&Action=A\" style=\"zoom:0.60\" frameborder=\"0\" height=\"900\" width=\"99.6%\"  data-toggle=\"modal\" data-target=\"#orderModal\" " + tooltip2 + " >Create an <span style=\"font-weight:bold;\">Activity / Reminder / Memo</span></button><br /><br />";
+                //     }
+                // }
+                // else
+                // {
+                //     arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights,LastLocation.Value);
+                // }
                 if (Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop]))) == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
                 {
                     strRowProperty = "style=\"background-color:#c0c0c0; border-radius:10px;\"";
@@ -1750,16 +1754,21 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         Session["HtmlTableCell"] = TdReport;
     }
 
-    protected string[] FnSignInSignOut(string strStaffId, string strDate, bool intNeed, bool intNeedRights)
+    protected string[] FnSignInSignOut(string strStaffId, string strDate, bool intNeed, bool intNeedRights, string LastLocationFound)
     {
 
-        string[] aryReturn = new string[] { "", "", "", "", "", "" };
+        //Response.Write(LastLocationFound);Response.End();
+        string Location = LastLocationFound, ThisLocation1 = "", ThisLocation2 = "";
+
+
+        string[] aryReturn = new string[] { "", "", "", "", "", "", "" };
         string Qry = "SELECT Case When In_Time IS NOT NULL AND Out_Time IS NULL THEN CAST('23:59' AS TIME) ELSE Out_Time END As Out_DTime, * FROM Attendance_Master WHERE Staff_Name='" + strStaffId + "' AND Attendance_Date='" + strDate + "' and Entered_Unit= '" + SessionHelper.GetSessionValue<string>(_unitIdKey, "0") + "' ";
 
         DataTable objTable = FillTable(Qry);
 
         foreach (DataRow objRow in objTable.Rows)
         {
+
             if (!string.IsNullOrWhiteSpace(Convert.ToString(objRow["In_Time"])))
             {
                 aryReturn[0] = "<span class=\"label\">In @-" + Convert.ToString(objRow["In_Time"]).Substring(0, 5) + "</span>";
@@ -1814,6 +1823,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 aryReturn[1] = OutDTime;
             }
         }
+
         string strNeedEdit = "1";
         if (intNeed && (!intNeedRights) && (!Convert.ToBoolean(Session["Admin"])))
         {
@@ -1825,49 +1835,67 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         {
             strIsMobile = " readOnly style=\"color:#ededed;width:50%; display:none;\"";
         }
-        string Location = "";
-        if (!string.IsNullOrWhiteSpace(Convert.ToString(Session["Location"])))
-        {
-            Location = Convert.ToString(Session["Location"]);
-        }
 
-        if (intNeed && aryReturn[0] == "" && aryReturn[1] == "")
+        try
         {
-            aryReturn[0] = "<input type=\"button\"   style=\"width:25%; border:3px; margin-bottom:5px;\" class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "'," + strStaffId + ",1," + strNeedEdit + ",this.nextSibling)\" value=\"In\" /><br/>" +
-                            "<textarea  rows=\"3\"" + strIsMobile + "  value=\"" + Location + "\">" + Location + "</textarea>";
-        }
-        else if (intNeed && aryReturn[0] != "" && aryReturn[1] == "")
-        {
-            aryReturn[1] = "<input type=\"button\"  style=\"width:25%; border:3px; margin-bottom:5px;\"  class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "'," + strStaffId + ",0," + strNeedEdit + ",this.nextSibling)\" value=\"Out\"><br/>" +
-                            "<textarea rows=\"3\"  " + strIsMobile + " value=\"" + Location + "\">" + Location + "</textarea>";
+            if (intNeed && aryReturn[0] == "" && aryReturn[1] == "")
+            {
+                if (LastLocationFound != "0")
+                {
 
-            aryReturn[0] = "<span class=\"label\">" + aryReturn[0] + "</span>";
+                    aryReturn[0] = "<input type=\"button\"   style=\"width:25%; border:3px; margin-bottom:5px;\" class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "','" + strStaffId + "',1,'" + strNeedEdit + "','" + LastLocationFound.ToString().Split(',')[0] + "','" + LastLocationFound.ToString().Split(',')[1] + "')\" value=\"In\" />";
+                }
+                else
+                {
+                    aryReturn[0] = "<input type=\"button\"   style=\"width:25%; border:3px; margin-bottom:5px;\" class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "','" + strStaffId + "',1,'" + strNeedEdit + "',0)\" value=\"In\" />";
+                }
+
+                //    Response.Write(aryReturn[0]);Response.End() ;
+            }
+            else if (intNeed && aryReturn[0] != "" && aryReturn[1] == "")
+            {
+                if (LastLocationFound != "0")
+                {
+                    aryReturn[1] = "<input type=\"button\"  style=\"width:25%; border:3px; margin-bottom:5px;\"  class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "'," + strStaffId + ",0," + strNeedEdit + "," + LastLocationFound.ToString().Split(',')[0] + "," + LastLocationFound.ToString().Split(',')[1] + ")\" value=\"Out\">";
+                }
+                else
+                {
+                    aryReturn[1] = "<input type=\"button\"  style=\"width:25%; border:3px; margin-bottom:5px;\"  class=\"btn-sm btn-default\" onclick=\"AjaxCallBack1(this.parentNode,'" + strDate + "'," + strStaffId + ",0," + strNeedEdit + ",0)\" value=\"Out\">";
+                }
+
+                aryReturn[0] = "<span class=\"label\">" + aryReturn[0] + "</span>";
+            }
+            else if (intNeedRights && aryReturn[0] == "" && aryReturn[1] == "" && Convert.ToBoolean(Session["Admin"]))
+            {
+                aryReturn[0] = "<a href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
+            }
+            else if (intNeedRights && aryReturn[0] != "" && aryReturn[1] == "" && Convert.ToBoolean(Session["Admin"]))
+            {
+                aryReturn[1] = "<a href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
+            }
+            else if (intNeedRights && aryReturn[0] == "" && aryReturn[1] == "" && strStaffId != Convert.ToString(Session["Login_Id"]))
+            {
+                aryReturn[0] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
+            }
+            else if (intNeedRights && aryReturn[0] != "" && aryReturn[1] == "" && strStaffId != Convert.ToString(Session["Login_Id"]))
+            {
+                aryReturn[1] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
+            }
+            else if (intNeedRights && strStaffId != Convert.ToString(Session["Login_Id"]))
+            {
+                aryReturn[0] = "<a href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[0] + "</a>";
+                aryReturn[1] = "<a href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[3] + "</a>";
+            }
+            else if (Convert.ToBoolean(Session["Admin"]))
+            {
+                aryReturn[0] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[0] + "</a>";
+                aryReturn[1] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[3] + "</a>";
+            }
+
         }
-        else if (intNeedRights && aryReturn[0] == "" && aryReturn[1] == "" && Convert.ToBoolean(Session["Admin"]))
+        catch (Exception Ex)
         {
-            aryReturn[0] = "<a href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
-        }
-        else if (intNeedRights && aryReturn[0] != "" && aryReturn[1] == "" && Convert.ToBoolean(Session["Admin"]))
-        {
-            aryReturn[1] = "<a href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
-        }
-        else if (intNeedRights && aryReturn[0] == "" && aryReturn[1] == "" && strStaffId != Convert.ToString(Session["Login_Id"]))
-        {
-            aryReturn[0] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
-        }
-        else if (intNeedRights && aryReturn[0] != "" && aryReturn[1] == "" && strStaffId != Convert.ToString(Session["Login_Id"]))
-        {
-            aryReturn[1] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Date=" + strDate + "&Staff_Id=" + strStaffId + "&Time_Sheet_Id=" + aryReturn[2] + "\">Enter Attendance</a>";
-        }
-        else if (intNeedRights && strStaffId != Convert.ToString(Session["Login_Id"]))
-        {
-            aryReturn[0] = "<a href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[0] + "</a>";
-            aryReturn[1] = "<a href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[3] + "</a>";
-        }
-        else if (Convert.ToBoolean(Session["Admin"]))
-        {
-            aryReturn[0] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[0] + "</a>";
-            aryReturn[1] = "<a  href=\"Attendance_Master.aspx?RequestType=1&Time_Sheet_Id=" + aryReturn[2] + "\">" + aryReturn[3] + "</a>";
+
         }
         return aryReturn;
     }
@@ -1905,38 +1933,19 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void Staff_Master_Staff_Name()
     {
-
-        //string StaffID = string.IsNullOrWhiteSpace(SessionHelper.GetSessionValue<string>("Staff_Id", string.Empty)) ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
-
-        //try
-        //{
-        //    Staff_Name.SelectedValue = StaffID;
-        //}
-        //catch (Exception ex)
-        //{
-
-        //}
         try
         {
             string strEmpId = Convert.ToString(Session["Login_Id"]);
             string strQuery = "SELECT [Staff_Id], [Staff_Name], CAST( CASE '" + Convert.ToString(strEmpId) + "' WHEN Staff_Id THEN 1 ELSE 0 END " +
                                " as bit) As Checked  FROM VW_Active_Staff_Master ";
 
-            //if (!Convert.ToBoolean(Session["Admin"]))
-            //{
+            if (!Convert.ToBoolean(Session["Admin"]))
+            {
                 strQuery = " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name]  , Cast(1 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Convert.ToString(strEmpId) + "')" +
                             " UNION " +
                             " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name] ,  Cast(0 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN(SELECT ISNULL(Reporting_Staff,0) FROM Reporting_Master WHERE Responsible_Staff IN('" + Convert.ToString(strEmpId) + "') )";
-            //}
-            //else
-            //{
-            //    strQuery = " SELECT [Staff_Id], Staff_Name +'['+ Cast ( Employee_code As Varchar(100)) +']' AS [Staff_Name]  , Cast(1 as bit) As Checked  FROM VW_Active_Staff_Master WHERE Company_Unit_Name=" + Convert.ToString(Session["Unit_Id"]) + " AND Staff_Id IN('" + Session["Login_Id"].ToString() + "')";
-            //}
-            //    DataTable objTable1 = FillTable(strQuery);
-            //    Staff_Name.DataSource = objTable1;
-            //    Staff_Name.DataBind();
-            //    Staff_Name.DataValueField = "Staff_Id";
-            //    Staff_Name.DataTextField = "Staff_Name";
+            }
+
             objclsTime_Sheet_Master.BindDropDownList
             (
                 strQuery,
@@ -1944,36 +1953,35 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             );
 
             Staff_Name.SelectedValue = (Convert.ToString(Session["Staff_Id"]) == "") ? Convert.ToString(Session["Login_Id"]) : Convert.ToString(Session["Staff_Id"]);
+
         }
         catch (Exception err)
         {
-            //objclsTime_Sheet_Master.WarningMessage("Error occurred in method of 'Staff_Master_Staff_Name' error details:" + Convert.ToString(err.Message), tdMessage);
+            // objclsTime_Sheet_Master.WarningMessage("Error occurred in method of 'Staff_Master_Staff_Name' error details:" + Convert.ToString(err.Message), tdMessage);
         }
-
-
     }
     protected void Button2_Click(object sender, EventArgs e)
     {
-        DateTime DateFrom1 = Convert.ToDateTime(DateFrom.Text).AddDays(-1);
+        DateTime DateFrom1 = Convert.ToDateTime(DateFrom.Text).AddDays(-1); AllUsersHdn.Value = "0";
         DateFrom.Text = DateFrom1.ToString("dd-MMM-yyyy");
         Load_Data1("");
 
     }
     protected void Button1_Click(object sender, EventArgs e)
     {
-        DateTime DateTo1 = Convert.ToDateTime(DateTo.Text).AddDays(1);
+        DateTime DateTo1 = Convert.ToDateTime(DateTo.Text).AddDays(1); AllUsersHdn.Value = "0";
         DateTo.Text = DateTo1.ToString("dd-MMM-yyyy");
         Load_Data1("");
     }
     protected void Button3_Click(object sender, EventArgs e)
     {
-        Staff_Name.SelectedIndex = 0;
+        Staff_Name.SelectedIndex = 0; AllUsersHdn.Value = "1";
         Load_Data1("");
     }
     protected void Button4_Click(object sender, EventArgs e)
     {
 
-        DateTime DateTo1 = CurrentTime.Date;
+        DateTime DateTo1 = CurrentTime.Date; AllUsersHdn.Value = "0";
         DateTo.Text = DateTo1.ToString("dd-MMM-yyyy");
         DateTime DateFrom1 = CurrentTime.Date;
         DateFrom.Text = DateFrom1.ToString("dd-MMM-yyyy");
@@ -1981,7 +1989,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
     }
     protected void Button5_Click(object sender, EventArgs e)
     {
-        Staff_Name.SelectedValue = Session["Login_Id"].ToString();
+        Staff_Name.SelectedValue = Session["Login_Id"].ToString(); AllUsersHdn.Value = "0";
         Load_Data1("");
     }
     protected void ImageMap1_Click(object sender, ImageClickEventArgs e)
@@ -2184,6 +2192,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
     }
     protected void Button8_Click(object sender, EventArgs e)
     {
+        // Response.Write(LastLocation.Value);Response.End();
         Response.Redirect("Time_Sheet_Master_Plan.aspx?RequestType=1&Date=" + GetDateAsDatetime() + "&Staff_Id=" + Session["Login_Id"].ToString() + "&id=0&Action=R&Mode=13&Location=" + LastLocation.Value + "&Vis=" + InputTxt.Text + "");
     }
 
