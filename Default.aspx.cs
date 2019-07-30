@@ -8,7 +8,7 @@ using System.Configuration;
 using System.Data;
 
 
-public partial class ToucheDefault : System.Web.UI.Page
+public partial class ToucheDefault : BasePage
 {
 
     protected void page_Load(object sender, System.EventArgs e)

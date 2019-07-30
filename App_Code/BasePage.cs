@@ -35,6 +35,7 @@ public class BasePage : Page
         SessionHelper.AddtoSession(timeZoneKey, Convert.ToInt32(timeZone));
     }
 
+
     public DateTime ConvertToLocal(DateTime utcTime)
     {
         var timeZoneOffset = SessionHelper.GetSessionValue<int>(timeZoneKey);
@@ -115,7 +116,7 @@ public class BasePage : Page
         }
     }
 
-    
+
     protected bool Validate_Duration(DataRow objRow, string Start_Field, string End_Field, DateTime dateValue, bool IsDayCheck)
     {
         if (objRow[Start_Field] != DBNull.Value && objRow[End_Field] != DBNull.Value)

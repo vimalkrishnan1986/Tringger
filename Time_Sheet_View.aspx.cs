@@ -270,8 +270,6 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void ShiftPendingTasks()
     {
-        DateTime dateTime = ConvertToLocal(DateTime.UtcNow);
-
         try
         {
             const string query = "Shiftpendingtasks";
