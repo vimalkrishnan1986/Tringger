@@ -33,16 +33,16 @@ public class BasePage : Page
     public static void SetTimeZone(string timeZone)
     {
         SessionHelper.AddtoSession(timeZoneKey, Convert.ToInt32(timeZone));
-        // capture the user timezone information
     }
 
     public DateTime ConvertToLocal(DateTime utcTime)
     {
-        var timeZoneOffset = SessionHelper.GetSessionValue<double>(timeZoneKey);
-        return utcTime.AddMinutes(timeZoneOffset);
+        var timeZoneOffset = SessionHelper.GetSessionValue<int>(timeZoneKey);
+        double offSet = 0 - timeZoneOffset;
+        return utcTime.AddMinutes(offSet);
     }
 
-    public static DateTime CurrentTime
+    public static DateTime CurrentUtcTime
     {
         get
         {
@@ -65,8 +65,6 @@ public class BasePage : Page
     {
         if (!IsPostBack)
         {
-            // to be removed after testing
-            //  SessionHelper.AddtoSession<int>(_loginIdKey, 8027);
             try
             {
                 _loginId = SessionHelper.GetSessionValue<string>(_loginIdKey);
@@ -117,15 +115,7 @@ public class BasePage : Page
         }
     }
 
-    protected bool IsValid_Duration(string DateFrom, string DateTo)
-    {
-        if (!string.IsNullOrEmpty(DateFrom) && !string.IsNullOrEmpty(DateTo))
-            return (Convert.ToDateTime(DateFrom) <= Convert.ToDateTime(DateTo));
-
-        return false;
-
-    }
-
+    
     protected bool Validate_Duration(DataRow objRow, string Start_Field, string End_Field, DateTime dateValue, bool IsDayCheck)
     {
         if (objRow[Start_Field] != DBNull.Value && objRow[End_Field] != DBNull.Value)

@@ -12,7 +12,7 @@ public class TimeSheetBase : BasePage
 {
     public DateTime GetIstDate()
     {
-        string TT = CurrentTime.ToString("yyyy-MM-dd HH:mm:ss");
+        string TT = CurrentUtcTime.ToString("yyyy-MM-dd HH:mm:ss");
         return Convert.ToDateTime(TT);
     }
 

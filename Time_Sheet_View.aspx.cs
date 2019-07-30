@@ -50,8 +50,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 ShiftPendingTasks();
                 Session["IsAlreadyLoad"] = true;
             }
-            DateFrom.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateFrom"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateFrom"]);
-            DateTo.Text = FormattedDate(CurrentTime);// (Convert.ToString(Session["DateTo"]) == "") ? FnGetDate(DateTime.UtcNow.AddHours(5).AddMinutes(30)) : Convert.ToString(Session["DateTo"]);
+            DateFrom.Text = FormattedDate(ConvertToLocal(CurrentUtcTime));
+            DateTo.Text = FormattedDate(ConvertToLocal(CurrentUtcTime));
             Staff_Master_Staff_Name();
             int responseType = GetQueryStringValue<int>("ResponseType");
             List<int> applicableResponseTypes = new List<int> { 3, 2, -1, 5 };
@@ -204,7 +204,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         else
         {
             aryReturn[0] = "1";
-            DateTime thisday = DateTime.Today;
+            DateTime thisday = CurrentUtcTime;
             //if (Convert.ToDateTime(ThisDate).ToShortDateString() == thisday.ToShortDateString())
             if (Convert.ToDateTime(ThisDate) <= thisday)
             {
@@ -270,6 +270,8 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     protected void ShiftPendingTasks()
     {
+        DateTime dateTime = ConvertToLocal(DateTime.UtcNow);
+
         try
         {
             const string query = "Shiftpendingtasks";
@@ -761,7 +763,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
             aryLodData[intFillLoop] = "";
             aryApprovecheck[intFillLoop] = "0";
         }
-        DateTime ThisDay = CurrentTime.Date;
+        DateTime ThisDay = CurrentUtcTime.Date;
         string strRowProperty = "";
         string strBorder = "";
 
@@ -819,7 +821,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                 {
                     for (int intPrintLoop = 0; intPrintLoop < aryLodData.Length; intPrintLoop++)
                     {
-                        string ThisDate2 = CurrentTime.Date.ToString("MM/dd/yyyy");
+                        string ThisDate2 = CurrentUtcTime.Date.ToString("MM/dd/yyyy");
                         string[] arySignInSignOut;
                         string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
 
@@ -832,14 +834,14 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
                         {
                             arySignInSignOut = FnSignInSignOut(strStaff_Id, strFullDate, false, ApproveRights, LastLocation.Value);
                         }
-                        if (strFullDate == Convert.ToString(FormattedDate(DateTime.UtcNow.AddHours(5).AddMinutes(30))))
+                        if (strFullDate == Convert.ToString(FormattedDate(CurrentUtcTime)))
                         {
                             strRowProperty = "style=\"background-color:#c0c0c0; border-radius:10px;\"";
-                            BeforeTime = "<span style=\"  width:100%;\"> :" + objRow["Start_Time"].ToString() + "</span>";
+                            BeforeTime = "<span style=\"  width:100%;\"> :" + ConvertToLocal(Convert.ToDateTime(objRow["Start_Time"])).ToString() + "</span>";
                         }
                         else
                         {
-                            BeforeTime = "<span style=\" width:100%;\"> :" + objRow["Time_Sheet_Date"].ToString() + " " + objRow["Start_Time"].ToString() + "</span>";
+                            BeforeTime = "<span style=\" width:100%;\"> :" + ConvertToLocal(Convert.ToDateTime(objRow["Time_Sheet_Date"])).ToString() + " " + ConvertToLocal(Convert.ToDateTime(objRow["Start_Time"])).ToString() + "</span>";
                         }
 
                         string But444 = "#" + strStaff_Id;
@@ -1661,7 +1663,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
         {
             for (int intPrintLoop = 0; intPrintLoop < aryLodData.Length; intPrintLoop++)
             {
-                string ThisDate2 = CurrentTime.Date.ToString("MM/dd/yyyy");
+                string ThisDate2 = CurrentUtcTime.Date.ToString("MM/dd/yyyy");
                 string[] arySignInSignOut;
                 string strFullDate = Convert.ToString(FormattedDate(Convert.ToDateTime(aryFullDate[intPrintLoop])));
 
@@ -1981,10 +1983,10 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
     protected void Button4_Click(object sender, EventArgs e)
     {
 
-        DateTime DateTo1 = CurrentTime.Date; AllUsersHdn.Value = "0";
-        DateTo.Text = DateTo1.ToString("dd-MMM-yyyy");
-        DateTime DateFrom1 = CurrentTime.Date;
-        DateFrom.Text = DateFrom1.ToString("dd-MMM-yyyy");
+        DateTime DateTo1 = CurrentUtcTime.Date; AllUsersHdn.Value = "0";
+        DateTo.Text = ConvertToLocal(DateTo1).ToString("dd-MMM-yyyy");
+        DateTime DateFrom1 = CurrentUtcTime.Date;
+        DateFrom.Text = ConvertToLocal(DateFrom1).ToString("dd-MMM-yyyy");
         Load_Data1("");
     }
     protected void Button5_Click(object sender, EventArgs e)
@@ -2132,7 +2134,7 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
         string Query = " and Project_Master.Project_Name ='" + ProjectDD.SelectedValue + "'";
         Load_Data1(Query);
-        DateFrom.Text = CurrentTime.Date.ToString("dd-MMM-yyyy");
+        DateFrom.Text = CurrentUtcTime.Date.ToString("dd-MMM-yyyy");
     }
     protected void UnpickedBtn_Click(object sender, EventArgs e)
     {
@@ -2215,12 +2217,12 @@ public partial class Time_Sheet_Master_Time_Sheet_View : TimeSheetBase
 
     private static DateTime GetDateAsDatetime()
     {
-        return Convert.ToDateTime(CurrentTime.ToString("yyyy-MM-dd HH:mm:ss"));
+        return Convert.ToDateTime(CurrentUtcTime.ToString("yyyy-MM-dd HH:mm:ss"));
     }
 
     private static string GetDateAsString()
     {
-        return CurrentTime.ToString("yyyy-MM-dd HH:mm:ss");
+        return CurrentUtcTime.ToString("yyyy-MM-dd HH:mm:ss");
 
     }
     #endregion

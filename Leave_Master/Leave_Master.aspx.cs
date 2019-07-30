@@ -10,7 +10,7 @@ using System.Data;
 using System.Net.Mail;
 using System.Drawing;
 
-public partial class Leave_Master : System.Web.UI.Page
+public partial class Leave_Master : BasePage
 {
     static clsLeave_Master objclsLeave_Master;
     static string connectionstring;
@@ -433,7 +433,7 @@ public partial class Leave_Master : System.Web.UI.Page
         string ThisStaffName = Convert.ToString(Staff_NameTxt.SelectedItem.Text);
         string LeaveFrom = Convert.ToString(Leave_From.Text);
         string LeaveTo = Convert.ToString(Leave_To.Text);
-        string datetod = Convert.ToString(DateTime.UtcNow.AddHours(5).AddMinutes(30));
+        string datetod = Convert.ToString(CurrentUtcTime);
         string Status = Convert.ToString(Leave_Approve.SelectedValue);
 
 

@@ -43,20 +43,7 @@
             );
         });
 
-        // settinng the timezone value over here
-
-        function CallSuccess() {
-
-        }
-
-        // alert message on some failure
-        function CallFailed(res) {
-            alert(res.get_message());
-        }
-        function SetTimeZone() {
-            var offset = new Date().getTimezoneOffset();
-            PageMethods.SetTimeZone(offset, CallSuccess, CallFailed);
-        }
+        
 
         function AjaxCallBack(objThis, strDate, intStaffId, status, strType) {
             if (window.XMLHttpRequest) {
@@ -81,7 +68,7 @@
             return true;
         }
 
-        function AjaxCallBack1(objThis, strDate, intStaffId, intNeed, intEditNeed, objLocationLat,objLocationLong) {
+        function AjaxCallBack1(objThis, strDate, intStaffId, intNeed, intEditNeed, objLocationLat, objLocationLong) {
 
             if (window.XMLHttpRequest) {
                 xmlhttp = new XMLHttpRequest();
@@ -92,7 +79,7 @@
 
             // alert(objLocation);
             //   alert(objLocation.value);
-            var strLocation = objLocationLat+','+objLocationLong;
+            var strLocation = objLocationLat + ',' + objLocationLong;
             // alert(strLocation);
 
             objThis.innerHTML = "<img src=\"/images/busy.gif\" border=0>";
@@ -480,7 +467,6 @@
             white-space: normal;
             word-wrap: break-word;
         }
-       
     </style>
 </asp:Content>
 <asp:Content runat="server" ID="MainContentId" style="height: 100%" ContentPlaceHolderID="MainContent">
